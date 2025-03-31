@@ -11,19 +11,6 @@ on:
         options:
           - preview
           - release
-  
-  push:
-    paths:
-      - 'Assets/**'
-      - 'Packages/**'
-      - 'ProjectSettings/**'
-      - 'Tests/**'
-  pull_request:
-    paths:
-      - 'Assets/**'
-      - 'Packages/**'
-      - 'ProjectSettings/**'
-      - 'Tests/**'
 
 jobs:
   # Step 2: Build (Tests Skipped)
