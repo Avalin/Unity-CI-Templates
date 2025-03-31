@@ -27,21 +27,15 @@ jobs:
     outputs:
       macPlatforms: ${{ steps.filter.outputs.macPlatforms }}
       ubuntuPlatforms: ${{ steps.filter.outputs.ubuntuPlatforms }}
-
     steps:
       - name: Separate Selected Platforms Into Outputs
         id: filter
         run: |
           echo "Original input: ${{ inputs.targetPlatforms }}"
-
-          MAC_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
-            | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
-          UBUNTU_PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' \
-            | jq -c '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
-
+          MAC_PLATFORMS=$(echo "${{ inputs.targetPlatforms }}" | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
+          UBUNTU_PLATFORMS=$(echo "${{ inputs.targetPlatforms }}" | jq -c '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
           echo "Mac platforms: $MAC_PLATFORMS"
           echo "Ubuntu platforms: $UBUNTU_PLATFORMS"
-
           echo "macPlatforms=$MAC_PLATFORMS" >> $GITHUB_OUTPUT
           echo "ubuntuPlatforms=$UBUNTU_PLATFORMS" >> $GITHUB_OUTPUT
 
