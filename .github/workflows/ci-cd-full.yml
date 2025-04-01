@@ -64,10 +64,13 @@ jobs:
     # - The branch is 'main' (push to main).
     # - The event is a push and the ref starts with 'refs/tags/' (a tag push for release).
     if: >
-      github.event_name == 'pull_request' ||
-      github.event_name == 'workflow_dispatch' ||
-      github.ref == 'refs/heads/main' ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
+      (
+        github.event_name == 'pull_request' ||
+        github.event_name == 'workflow_dispatch' ||
+        github.ref == 'refs/heads/main' ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+      )
     uses: avalin/unity-ci-templates/.github/workflows/step-2-build.yml@main
     with:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
