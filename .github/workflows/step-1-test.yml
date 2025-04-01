@@ -28,6 +28,11 @@ on:
         required: false
         default: 'Assets/Tests/PlayMode'
         type: string
+      timeoutMinutes:
+        description: "Timeout for test jobs"
+        type: number
+        required: false
+        default: 15
     secrets:
       UNITY_EMAIL:
         required: true
@@ -56,6 +61,7 @@ jobs:
   run-editmode:
     name: 🥪 EditMode Tests
     needs: [detect-tests, upload-license]
+    timeout-minutes: ${{ inputs.timeoutMinutes }}
     if: needs.detect-tests.outputs.has_editmode == 'true'
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
@@ -68,6 +74,7 @@ jobs:
   run-playmode:
     name: 🎮 PlayMode Tests
     needs: [detect-tests, upload-license]
+    timeout-minutes: ${{ inputs.timeoutMinutes }}
     if: needs.detect-tests.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
