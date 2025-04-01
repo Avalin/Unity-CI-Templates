@@ -17,6 +17,11 @@ on:
         type: string
         default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
         required: false
+      timeoutMinutes:
+        description: "Timeout for each build job in minutes"
+        type: number
+        default: 30
+        required: false
     secrets:
       UNITY_EMAIL:
         required: true
