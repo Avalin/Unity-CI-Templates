@@ -5,7 +5,7 @@ on:
     inputs:
       unityVersion:
         description: "Unity version to use"
-        required: true
+        required: false
         default: 'auto'
         type: string
       licenseArtifactName:
@@ -61,7 +61,6 @@ jobs:
   run-editmode:
     name: 🥪 EditMode Tests
     needs: [detect-tests, upload-license]
-    timeout-minutes: ${{ inputs.timeoutMinutes }}
     if: needs.detect-tests.outputs.has_editmode == 'true'
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
@@ -69,12 +68,12 @@ jobs:
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
       unityVersion: ${{ inputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLfs }}
+      timeoutMinutes: ${{ inputs.timeoutMinutes }}
     secrets: inherit
 
   run-playmode:
     name: 🎮 PlayMode Tests
     needs: [detect-tests, upload-license]
-    timeout-minutes: ${{ inputs.timeoutMinutes }}
     if: needs.detect-tests.outputs.has_playmode == 'true'
     uses: ./.github/workflows/unity-tests-runner.yml
     with:
@@ -82,4 +81,5 @@ jobs:
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
       unityVersion: ${{ inputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLfs }}
+      timeoutMinutes: ${{ inputs.timeoutMinutes }}
     secrets: inherit

@@ -9,19 +9,20 @@ on:
         type: string
       unityVersion:
         description: "Unity version to use"
-        required: false
-        default: 'auto'
+        required: true
         type: string
       useGitLfs:
         description: "Whether to use Git LFS (true/false)"
-        required: false
-        default: 'true'
+        required: true
         type: string
       licenseArtifactName:
         description: "Name of uploaded license artifact"
-        required: false
-        default: 'unity-license'
+        required: true
         type: string
+      timeoutMinutes:
+        description: "Timeout for each build job in minutes"
+        type: number
+        required: true
 
 jobs:
   run-tests:
@@ -78,7 +79,7 @@ jobs:
 
       - name: Run ${{ inputs.testMode }} Tests
         id: run-tests
-        timeout-minutes: 30
+        timeout-minutes: ${{ inputs.timeoutMinutes }}
         continue-on-error: false
         uses: game-ci/unity-test-runner@v4
         env:
