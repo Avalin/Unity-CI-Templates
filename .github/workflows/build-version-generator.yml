@@ -1,0 +1,44 @@
+name: 🏷️ Build Version Generator
+
+on:
+  workflow_call:
+    inputs:
+      buildType:
+        description: "Build type (preview or release)"
+        required: true
+        type: string
+    outputs:
+      version:
+        description: "The generated build version"
+        value: ${{ jobs.determine.outputs.version }}
+
+jobs:
+  determine:
+    name: Parse Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Determine Version
+        id: get_version
+        shell: bash
+        run: |
+          if [ "${{ inputs.buildType }}" = "release" ]; then
+            VERSION=$(echo "${GITHUB_REF}" | sed 's/refs\/tags\///')
+            
+            # 🔒 Validate tag format (v1.2.3 or v1.2.3-beta etc.)
+            if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.-]+)?$ ]]; then
+              echo "❌ Invalid tag format: $VERSION"
+              exit 1
+            fi
+          else
+            VERSION=T$(date +%Y%m%d%H%M%S)_CH${GITHUB_SHA:0:7}
+          fi
+
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "📦 Determined version: ${VERSION}"

@@ -5,21 +5,22 @@ on:
   workflow_dispatch:
     inputs:
       buildType:
-        description: "Choose build type"
+        description: "preview = manual/development build | release = only via Git tag (v1.2.3)"
         required: true
         default: "preview"
         type: choice
         options:
           - preview
-          - release
       targetPlatforms:
         description: "JSON array of platforms to build"
         type: string
         default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
         required: false
-        
   # Automatically run tests & builds on certain branches or PR changes
   push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
     paths:
       - 'Assets/**'
       - 'Packages/**'
@@ -38,13 +39,14 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   run-tests:
     name: Run Tests
-    uses: ./.github/workflows/step-1-test.yml
+    uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
     with:
       unityVersion: '2022.3.60f1'
       licenseArtifactName: 'unity-license'
       useGitLfs: 'true'
       editModePath: 'Assets/Tests/Editor'
       playModePath: 'Assets/Tests/PlayMode'
+      timeoutMinutes: 15
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -56,18 +58,29 @@ jobs:
   build:
     name: Build
     needs: [ run-tests ]
-    # Only build if:
-    # - We have a pull request
-    # - We have manual dispatch (either preview or release)
-    # - We are pushing to "main"
+    # Build if ANY of these conditions are met:
+    # - The event is a pull_request.
+    # - The event is a workflow_dispatch (manual trigger).
+    # - The branch is 'main' (push to main).
+    # - The event is a push and the ref starts with 'refs/tags/' (a tag push for release).
     if: >
       github.event_name == 'pull_request' ||
-      (github.event_name == 'workflow_dispatch') ||
-      github.ref == 'refs/heads/main'
-    uses: ./.github/workflows/step-2-build.yml
+      github.event_name == 'workflow_dispatch' ||
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+    uses: avalin/unity-ci-templates/.github/workflows/step-2-build.yml@main
     with:
-      targetPlatforms: '["Android","iOS"]'
+      # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
+      buildType: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && 'release' || github.event.inputs.buildType }}
+      targetPlatforms: >
+        ${{ 
+          github.event.inputs.targetPlatforms == '' 
+            && '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+            || github.event.inputs.targetPlatforms 
+        }}
+      timeoutMinutes: 30
     secrets:
-      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+

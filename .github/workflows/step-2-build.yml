@@ -3,10 +3,24 @@ name: ✨ Step 2 - Build
 on:
   workflow_call:
     inputs:
+      projectName:
+        description: "The name of the built project i.e. 'My_Project' (avoid spaces)"
+        default: "My_Project"
+        type: string
+        required: false
+      buildType:
+        description: "Build type, e.g. 'preview' or 'release'"
+        type: string
+        required: true
       targetPlatforms:
         description: "JSON array of platforms to build"
         type: string
         default: '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+        required: false
+      timeoutMinutes:
+        description: "Timeout for each build job in minutes"
+        type: number
+        default: 30
         required: false
     secrets:
       UNITY_EMAIL:
@@ -22,28 +36,23 @@ concurrency:
 
 jobs:
   filter_platforms:
-    name: Filter Platforms
-    runs-on: ubuntu-latest
-    outputs:
-      macPlatforms: ${{ steps.filter.outputs.macPlatforms }}
-      ubuntuPlatforms: ${{ steps.filter.outputs.ubuntuPlatforms }}
-    steps:
-      - name: Separate Selected Platforms Into Outputs
-        id: filter
-        run: |
-          echo "Original input: ${{ inputs.targetPlatforms }}"
-          MAC_PLATFORMS=$(echo "${{ inputs.targetPlatforms }}" | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
-          UBUNTU_PLATFORMS=$(echo "${{ inputs.targetPlatforms }}" | jq -c '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
-          echo "Mac platforms: $MAC_PLATFORMS"
-          echo "Ubuntu platforms: $UBUNTU_PLATFORMS"
-          echo "macPlatforms=$MAC_PLATFORMS" >> $GITHUB_OUTPUT
-          echo "ubuntuPlatforms=$UBUNTU_PLATFORMS" >> $GITHUB_OUTPUT
+    uses: ./.github/workflows/target-platforms-filter.yml
+    with:
+      targetPlatforms: ${{ inputs.targetPlatforms }}
+
+  determine_version:
+    uses: ./.github/workflows/build-version-generator.yml
+    with:
+      buildType: ${{ inputs.buildType }}
 
   build_on_macos:
     name: Build for ${{ matrix.targetPlatform }}
+    if: needs.filter_platforms.outputs.macPlatforms != '[]'
     runs-on: ${{ matrix.os }}
-    needs: filter_platforms
+    timeout-minutes: ${{ inputs.timeoutMinutes }}
+    needs: [filter_platforms, determine_version]
     strategy:
+      fail-fast: false
       matrix:
         os: 
           - macOS-latest
@@ -58,7 +67,9 @@ jobs:
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: Library-${{ matrix.targetPlatform }}-
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+            Library-
         
       - name: Build Unity Project
         uses: game-ci/unity-builder@v4
@@ -72,19 +83,23 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ matrix.targetPlatform }}-${{ env.VERSION }}
+          name: ${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
           path: build/${{ matrix.targetPlatform }}
-    
+          retention-days: ${{ inputs.buildType == 'release' && 30 || 7 }}          
+
   build_on_ubuntu:
     name: Build for ${{ matrix.targetPlatform }}
+    if: needs.filter_platforms.outputs.ubuntuPlatforms != '[]'
     runs-on: ${{ matrix.os }}
-    needs: filter_platforms
+    timeout-minutes: ${{ inputs.timeoutMinutes }}
+    needs: [filter_platforms, determine_version]
     strategy:
+      fail-fast: false
       matrix:
         os: 
           - ubuntu-latest
         targetPlatform: ${{ fromJson(needs.filter_platforms.outputs.ubuntuPlatforms) }}
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -94,7 +109,9 @@ jobs:
         with:
           path: Library
           key: Library-${{ matrix.targetPlatform }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: Library-${{ matrix.targetPlatform }}-
+          restore-keys: |
+            Library-${{ matrix.targetPlatform }}-
+            Library-
 
       - name: Check Free Disk Space (Android only)
         if: matrix.targetPlatform == 'Android'
@@ -112,9 +129,10 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Build-${{ matrix.targetPlatform }}-${{ env.VERSION }}
+          name: ${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
           path: build/${{ matrix.targetPlatform }}
-  
+          retention-days: ${{ inputs.buildType == 'release' && 30 || 7 }}
+
   confirm_builds:
     name: Confirm Builds
     runs-on: ubuntu-latest

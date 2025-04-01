@@ -1,0 +1,49 @@
+name: 🚀 Stripped CI/CD Pipeline (No Tests)
+
+on:
+  # Allow manual dispatch with a buildType input
+  workflow_dispatch:
+    inputs:
+      buildType:
+        description: "preview = manual/development build | release = only via Git tag (v1.2.3)"
+        required: true
+        default: "preview"
+        type: choice
+        options:
+          - preview
+      targetPlatforms:
+        description: "JSON array of platforms to build"
+        type: string
+        default: '["Android","iOS"]'
+        required: false
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # 2. Build
+  # ─────────────────────────────────────────────────────────────────────────────
+  build:
+    name: Build
+    # Build if ANY of these conditions are met:
+    # - The event is a pull_request.
+    # - The event is a workflow_dispatch (manual trigger).
+    # - The branch is 'main' (push to main).
+    # - The event is a push and the ref starts with 'refs/tags/' (a tag push for release).
+    if: >
+      github.event_name == 'pull_request' ||
+      github.event_name == 'workflow_dispatch' ||
+      github.ref == 'refs/heads/main' ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+    uses: avalin/unity-ci-templates/.github/workflows/step-2-build.yml@main
+    with:
+      # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
+      buildType: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && 'release' || github.event.inputs.buildType }}
+      targetPlatforms: >
+        ${{ 
+          github.event.inputs.targetPlatforms == '' 
+            && '["Android","iOS"]' 
+            || github.event.inputs.targetPlatforms 
+        }}
+    secrets:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}

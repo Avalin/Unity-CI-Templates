@@ -1,0 +1,67 @@
+name: 🧮 Target Platforms Filter
+
+on:
+  workflow_call:
+    inputs:
+      targetPlatforms:
+        description: "JSON array of platforms to validate and split"
+        required: true
+        type: string
+    outputs:
+      macPlatforms:
+        description: "List of platforms requiring macOS runners"
+        value: ${{ jobs.filter_platforms.outputs.macPlatforms }}
+      ubuntuPlatforms:
+        description: "List of platforms compatible with Ubuntu runners"
+        value: ${{ jobs.filter_platforms.outputs.ubuntuPlatforms }}
+
+jobs:
+  filter_platforms:
+    name: Filter Platforms
+    runs-on: ubuntu-latest
+    outputs:
+      macPlatforms: ${{ steps.filter.outputs.macPlatforms }}
+      ubuntuPlatforms: ${{ steps.filter.outputs.ubuntuPlatforms }}
+
+    steps:
+      - name: 🔍 Validate and Filter Platforms
+        id: validate
+        run: |
+          echo "🔍 Validating input: ${{ inputs.targetPlatforms }}"
+
+          KNOWN_PLATFORMS='["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
+          INPUT_JSON='${{ inputs.targetPlatforms }}'
+
+          # Validate JSON syntax
+          echo "$INPUT_JSON" | jq empty || {
+            echo "❌ Input is not valid JSON."
+            exit 1
+          }
+
+          # Extract unknown platforms
+          UNKNOWN=$(echo "$INPUT_JSON" | jq -r --argjson known "$KNOWN_PLATFORMS" '.[] | select( . as $p | $known | index($p) | not )')
+          if [[ -n "$UNKNOWN" ]]; then
+            echo "⚠️ Warning: These platforms are not recognized and will be ignored:"
+            echo "$UNKNOWN" | sed 's/^/- /'
+          fi
+
+          # Filter valid platforms
+          VALID=$(echo "$INPUT_JSON" | jq -c --argjson known "$KNOWN_PLATFORMS" '[ .[] | select( . as $p | $known | index($p) ) ]')
+          echo "✅ Valid platforms: $VALID"
+
+          echo "validPlatforms=$VALID" >> $GITHUB_OUTPUT
+
+      - name: 🧪 Split Platforms by OS
+        id: filter
+        run: |
+          VALID_PLATFORMS='${{ steps.validate.outputs.validPlatforms }}'
+          echo "📥 Using filtered valid platforms: $VALID_PLATFORMS"
+          
+          MAC_PLATFORMS=$(echo "$VALID_PLATFORMS" | jq -c '[ .[] | select(. == "StandaloneOSX" or . == "iOS") ]')
+          UBUNTU_PLATFORMS=$(echo "$VALID_PLATFORMS" | jq -c '[ .[] | select(. != "StandaloneOSX" and . != "iOS") ]')
+
+          echo "💻 Mac platforms: $MAC_PLATFORMS"
+          echo "🐧 Ubuntu platforms: $UBUNTU_PLATFORMS"
+
+          echo "macPlatforms=$MAC_PLATFORMS" >> $GITHUB_OUTPUT
+          echo "ubuntuPlatforms=$UBUNTU_PLATFORMS" >> $GITHUB_OUTPUT

@@ -28,7 +28,7 @@ jobs:
           echo "🔍 Searching for license file..."
           FOUND=$(find $HOME -type f -name 'Unity_lic.ulf' | head -n 1)
           if [ -z "$FOUND" ]; then
-            echo "❌ License file not found"
+            echo "❌ License file not found. Build aborted."
             exit 1
           else
             echo "✅ Found at $FOUND"

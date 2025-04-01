@@ -5,7 +5,7 @@ on:
     inputs:
       unityVersion:
         description: "Unity version to use"
-        required: true
+        required: false
         default: 'auto'
         type: string
       licenseArtifactName:
@@ -28,6 +28,11 @@ on:
         required: false
         default: 'Assets/Tests/PlayMode'
         type: string
+      timeoutMinutes:
+        description: "Timeout for each test job in minutes"
+        type: number
+        required: false
+        default: 15
     secrets:
       UNITY_EMAIL:
         required: true
@@ -39,7 +44,7 @@ on:
 jobs:
   detect-tests:
     name: 🔍 Detect Tests
-    uses: ./.github/workflows/detect-unity-tests.yml
+    uses: ./.github/workflows/unity-tests-detection.yml
     with:
       editModePath: ${{ inputs.editModePath }}
       playModePath: ${{ inputs.playModePath }}
@@ -48,7 +53,7 @@ jobs:
     name: 📥️ Upload Unity License
     needs: detect-tests
     if: needs.detect-tests.outputs.has_editmode == 'true' || needs.detect-tests.outputs.has_playmode == 'true'
-    uses: ./.github/workflows/upload-unity-license.yml
+    uses: ./.github/workflows/unity-license-uploader.yml
     with:
       artifactName: ${{ inputs.licenseArtifactName }}
     secrets: inherit
@@ -57,22 +62,24 @@ jobs:
     name: 🥪 EditMode Tests
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_editmode == 'true'
-    uses: ./.github/workflows/unity-test-runner.yml
+    uses: ./.github/workflows/unity-tests-runner.yml
     with:
       testMode: EditMode
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
       unityVersion: ${{ inputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLfs }}
+      timeoutMinutes: ${{ inputs.timeoutMinutes }}
     secrets: inherit
 
   run-playmode:
     name: 🎮 PlayMode Tests
     needs: [detect-tests, upload-license]
     if: needs.detect-tests.outputs.has_playmode == 'true'
-    uses: ./.github/workflows/unity-test-runner.yml
+    uses: ./.github/workflows/unity-tests-runner.yml
     with:
       testMode: PlayMode
       licenseArtifactName: ${{ inputs.licenseArtifactName }}
       unityVersion: ${{ inputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLfs }}
+      timeoutMinutes: ${{ inputs.timeoutMinutes }}
     secrets: inherit

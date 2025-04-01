@@ -1,0 +1,65 @@
+name: 📦 Step 3 - Release
+
+on:
+  workflow_call:
+    inputs:
+      buildType:
+        description: "Should be 'release' to trigger publishing"
+        type: string
+        required: true
+      version:
+        description: "The version/tag name (e.g., v1.2.3)"
+        type: string
+        required: true
+      projectName:
+        description: "Project name used in the artifact"
+        type: string
+        required: true
+      targetPlatforms:
+        description: "JSON array of platforms to expect artifacts for"
+        type: string
+        required: true
+
+jobs:
+  publish:
+    if: ${{ inputs.buildType == 'release' }}
+    name: 📤 Publish GitHub Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: 📝 Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ inputs.version }}
+          release_name: Release ${{ inputs.version }}
+          draft: false
+          prerelease: ${{ contains(inputs.version, '-') }}
+
+      - name: 🧮 Upload Artifacts
+        run: |
+          VERSION="${{ inputs.version }}"
+          PROJECT="${{ inputs.projectName }}"
+          PLATFORMS=$(echo '${{ inputs.targetPlatforms }}' | jq -r '.[]')
+
+          for PLATFORM in $PLATFORMS; do
+            ARTIFACT_PATH="release-artifacts/${{ inputs.buildType }}-${PROJECT}-${PLATFORM}-${VERSION}"
+            if [ -d "$ARTIFACT_PATH" ]; then
+              zip -r "${PLATFORM}.zip" "$ARTIFACT_PATH"
+              curl \
+                -X POST \
+                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Content-Type: application/zip" \
+                --data-binary @"${PLATFORM}.zip" \
+                "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create_release.outputs.id }}/assets?name=${PROJECT}-${PLATFORM}-${VERSION}.zip"
+            else
+              echo "⚠️ Skipping: $ARTIFACT_PATH not found"
+            fi
+          done
