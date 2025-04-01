@@ -40,6 +40,7 @@ jobs:
   run-tests:
     name: Run Tests
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@main
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     with:
       unityVersion: '2022.3.60f1'
       licenseArtifactName: 'unity-license'
