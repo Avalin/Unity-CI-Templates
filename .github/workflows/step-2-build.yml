@@ -92,6 +92,7 @@ jobs:
     name: Build for ${{ matrix.targetPlatform }}
     if: needs.filter_platforms.outputs.macPlatforms != '[]'
     runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ inputs.timeoutMinutes }}
     needs: [filter_platforms, determine_version]
     strategy:
       matrix:
@@ -132,6 +133,7 @@ jobs:
     name: Build for ${{ matrix.targetPlatform }}
     if: needs.filter_platforms.outputs.ubuntuPlatforms != '[]'
     runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ inputs.timeoutMinutes }}
     needs: [filter_platforms, determine_version]
     strategy:
       matrix:
