@@ -29,7 +29,7 @@ on:
         default: 'Assets/Tests/PlayMode'
         type: string
       timeoutMinutes:
-        description: "Timeout for test jobs"
+        description: "Timeout for each test job in minutes"
         type: number
         required: false
         default: 15
