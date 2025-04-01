@@ -95,6 +95,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeoutMinutes }}
     needs: [filter_platforms, determine_version]
     strategy:
+      fail-fast: false
       matrix:
         os: 
           - macOS-latest
@@ -136,6 +137,7 @@ jobs:
     timeout-minutes: ${{ inputs.timeoutMinutes }}
     needs: [filter_platforms, determine_version]
     strategy:
+      fail-fast: false
       matrix:
         os: 
           - ubuntu-latest

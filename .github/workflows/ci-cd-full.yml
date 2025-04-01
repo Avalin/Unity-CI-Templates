@@ -46,6 +46,7 @@ jobs:
       useGitLfs: 'true'
       editModePath: 'Assets/Tests/Editor'
       playModePath: 'Assets/Tests/PlayMode'
+      timeoutMinutes: 15
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -77,6 +78,7 @@ jobs:
             && '["Android","WebGL","StandaloneLinux64","StandaloneWindows","StandaloneWindows64","StandaloneOSX","iOS"]'
             || github.event.inputs.targetPlatforms 
         }}
+      timeoutMinutes: 30
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
