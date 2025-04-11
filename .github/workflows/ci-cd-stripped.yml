@@ -22,7 +22,6 @@ jobs:
   smoke-test:
     name: 🚬 Smoke Test
     if: always()
-    needs: []
     uses: avalin/unity-ci-templates/.github/workflows/step-2-smoke-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
