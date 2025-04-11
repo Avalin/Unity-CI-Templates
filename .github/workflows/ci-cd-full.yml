@@ -88,8 +88,10 @@ jobs:
     # - Smoke test passed OR was skipped (it's optional, but must not fail)
     # - The event is a pull_request, workflow_dispatch, or version tag push
     if: >
-      (needs.smoke-test.result == 'success' || needs.smoke-test.result == 'skipped') &&
-      needs.run-tests.result == 'success' &&
+      (!contains(needs, 'smoke-test') ||
+      needs['smoke-test'].result == 'success' ||
+      needs['smoke-test'].result == 'skipped') &&
+      needs['run-tests'].result == 'success' &&
       (
         github.event_name == 'pull_request' ||
         github.event_name == 'workflow_dispatch' ||
