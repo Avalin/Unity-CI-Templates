@@ -92,7 +92,7 @@ Can be found under:
 | Variable Name               | Description |
 |-----------------------------|-------------|
 | `PROJECT_NAME`              | Name of the Unity project |
-| `UNITY_VERSION`             | Unity version (e.g. `2022.3.13f1`) |
+| `UNITY_VERSION`             | Unity version (e.g. `auto` or `2022.3.13f1`) |
 | `USE_GIT_LFS`               | Use Git LFS (`true`/`false`) |
 | `LICENSE_ARTIFACT_NAME`     | Artifact name for uploaded license |
 | `UNITY_TESTS_EDITMODE_PATH` | Path to EditMode tests |
@@ -103,6 +103,8 @@ Can be found under:
 | `TIMEOUT_BUILD_IN_MINUTES`  | Build timeout per job |
 | `RETENTION_DAYS_PREVIEW`    | Days to retain preview builds |
 | `RETENTION_DAYS_RELEASE`    | Days to retain release builds |
+| `ENABLE_SMOKE_TEST`         | Whether to run smoke tests (`true`/`false`) |
+| `DEPLOY_TARGETS`            | Deployment targets (JSON array) |
 
 ---
 
