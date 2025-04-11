@@ -66,12 +66,12 @@ jobs:
   smoke-test:
     name: 🚬 Smoke Test
     needs: [ run-tests ]
-    if: ${{ vars.ENABLE_SMOKE_TEST == 'true' }}
     uses: avalin/unity-ci-templates/.github/workflows/step-2-smoke-test.yml@main
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
       licenseArtifactName: ${{ vars.LICENSE_ARTIFACT_NAME }}
       useGitLfs: ${{ vars.USE_GIT_LFS }}
+      enableSmokeTest: ${{ vars.ENABLE_SMOKE_TEST }}
     secrets:
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -88,8 +88,7 @@ jobs:
     # - Smoke test passed OR was skipped (it's optional, but must not fail)
     # - The event is a pull_request, workflow_dispatch, or version tag push
     if: >
-      (!contains(needs, 'smoke-test') ||
-      needs['smoke-test'].result == 'success' ||
+      (needs['smoke-test'].result == 'success' ||
       needs['smoke-test'].result == 'skipped') &&
       needs['run-tests'].result == 'success' &&
       (
