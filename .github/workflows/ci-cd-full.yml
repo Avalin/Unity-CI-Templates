@@ -65,7 +65,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   smoke-test:
     name: 🚬 Smoke Test
-    if: always()
+    if: ${{ vars.ENABLE_SMOKE_TEST == 'true' }}
     needs: [ run-tests ]
     uses: avalin/unity-ci-templates/.github/workflows/step-2-smoke-test.yml@main
     with:
