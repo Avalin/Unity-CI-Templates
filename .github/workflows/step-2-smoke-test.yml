@@ -6,20 +6,11 @@ on:
       unityVersion:
         required: true
         type: string
-      licenseArtifactName:
-        required: true
-        type: string
-      useGitLfs:
-        description: "Whether to use Git LFS (true/false)"
-        required: false
-        default: 'true'
-        type: string
       enableSmokeTest:
         description: "Whether to run the smoke test"
         required: false
         default: 'true'
         type: string
-
     secrets:
       UNITY_EMAIL:
         required: true
@@ -30,48 +21,26 @@ on:
 
 jobs:
   smoke-test:
+    if: ${{ inputs.enableSmokeTest == 'true' }}
     name: 🚬 Unity CLI Smoke Test
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
-      - name: 🚫 Skip Rest If Smoke-Test Disabled
-        if: ${{ inputs.enableSmokeTest != 'true' }}
-        run: |
-          echo "Smoke test is disabled via input. Skipping job."
-          exit 0
-
       - name: ⬇️ Checkout
         uses: actions/checkout@v4
+
+      - name: 🚬 Run Headless CLI Smoke Test
+        uses: game-ci/unity-test-runner@v3
         with:
-          lfs: ${{ inputs.useGitLfs }}
-
-      - name: 🧪 Download License
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.licenseArtifactName }}
-
-      - name: 🛠️ Inject Unity License
-        run: |
-          mkdir -p ~/.local/share/unity3d/Unity
-          find . -name "Unity_lic.ulf" -exec cp {} ~/.local/share/unity3d/Unity/Unity_lic.ulf \;        
-
-      - name: 🚬 Run Headless CLI Launch
-        id: smoke
-        run: |
-          set -e
-          echo "Running Unity in headless mode to verify startup integrity..."
-
-          unity-editor -batchmode -nographics -projectPath . \
-            -executeMethod SmokeTest.EntryPoint \
-            -logFile smoke.log || {
-              echo "❌ Unity CLI failed. Dumping smoke.log..."
-              cat smoke.log || true
-              exit 1
-            }
-
-          echo "✅ Unity booted and ran smoke test without crashing."
-          tail -n 20 smoke.log || true
+          unityVersion: ${{ inputs.unityVersion }}
+          projectPath: .
+          testMode: playmode
+          customParameters: -executeMethod SmokeTest.EntryPoint -logFile smoke.log
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: 📎 Upload smoke.log
         if: always()
