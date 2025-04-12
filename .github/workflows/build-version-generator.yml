@@ -38,7 +38,8 @@ jobs:
           else
             # 🕵️ Detect PR number from GITHUB_REF
             if [[ "$GITHUB_REF" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
-              VERSION="pr${BASH_REMATCH[1]}"
+              PR_NUMBER=$(printf "%04d" "${BASH_REMATCH[1]}")  # Pad PR number to 4 digits
+              VERSION="PR-${PR_NUMBER}"
             # 🕵️ Detect branch name as fallback
             else
               BRANCH_NAME=$(echo "${GITHUB_REF##refs/heads/}" | tr '/' '-')

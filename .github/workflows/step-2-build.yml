@@ -88,7 +88,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
+          name: ${{ inputs.projectName }}_${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
           path: build/${{ matrix.targetPlatform }}
           retention-days: ${{ inputs.retentionDays }}
 
@@ -134,7 +134,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.buildType }}-${{ inputs.projectName }}-${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
+          name: ${{ inputs.projectName }}_${{ matrix.targetPlatform }}-${{ needs.determine_version.outputs.version }}
           path: build/${{ matrix.targetPlatform }}
           retention-days: ${{ inputs.retentionDays }}
 
@@ -152,12 +152,15 @@ jobs:
           echo "## ✅ Unity Build Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
+          # Parse the JSON arrays from the outputs
+          ubuntu_list=$(echo "${{ needs.filter_platforms.outputs.ubuntuPlatforms }}" | jq -r '.[]')
+          mac_list=$(echo "${{ needs.filter_platforms.outputs.macPlatforms }}" | jq -r '.[]')
+
           echo "### 🐧 Ubuntu Platforms Attempted" >> $GITHUB_STEP_SUMMARY
-          ubuntu_list="${{ needs.filter_platforms.outputs.ubuntuPlatforms }}"
-          if [[ "$ubuntu_list" == "[]" ]]; then
+          if [[ -z "$ubuntu_list" ]]; then
             echo "- ⏭️ None" >> $GITHUB_STEP_SUMMARY
           else
-            echo "- Platforms: \`$(echo "$ubuntu_list" | jq -r '.[]' | paste -sd ', ')`\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Platforms: \`$(echo "$ubuntu_list" | paste -sd ', ')\`" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
@@ -169,11 +172,10 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "### 🍏 macOS Platforms Attempted" >> $GITHUB_STEP_SUMMARY
-          mac_list="${{ needs.filter_platforms.outputs.macPlatforms }}"
-          if [[ "$mac_list" == "[]" ]]; then
+          if [[ -z "$mac_list" ]]; then
             echo "- ⏭️ None" >> $GITHUB_STEP_SUMMARY
           else
-            echo "- Platforms: \`$(echo "$mac_list" | jq -r '.[]' | paste -sd ', ')`\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Platforms: \`$(echo "$mac_list" | paste -sd ', ')\`" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
 
@@ -182,4 +184,5 @@ jobs:
             skipped) echo "- Build Status: ⏭️ Skipped (No macOS targets)" >> $GITHUB_STEP_SUMMARY ;;
             *)       echo "- Build Status: ❌ One or more macOS builds failed" >> $GITHUB_STEP_SUMMARY ;;
           esac
+
 
