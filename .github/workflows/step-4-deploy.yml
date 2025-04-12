@@ -113,7 +113,7 @@ jobs:
           if [ -z "${{ secrets.FIREBASE_TOKEN }}" ]; then
             echo "⚠️ Missing Firebase token. Skipping..."; exit 0;
           fi
-          cd "deployment-artifacts/${{ inputs.projectName }}/WebGL" || exit 0
+          cd "deployment-artifacts/${{ inputs.projectName }}/WebGL" || exit 1
           npm install -g firebase-tools
           firebase deploy --token "${{ secrets.FIREBASE_TOKEN }}"
 
@@ -129,11 +129,19 @@ jobs:
           aws s3 sync "deployment-artifacts/${{ inputs.projectName }}/WebGL" "s3://${{ secrets.S3_BUCKET }}" --delete
 
       # ───── GitHub Pages ─────
+      - name: 🔍 Check WebGL Build Exists
+        if: matrix.target == 'gh-pages'
+        run: |
+          if [ ! -d "deployment-artifacts/${{ inputs.projectName }}/WebGL" ]; then
+            echo "❌ WebGL build not found. Cannot deploy to GitHub Pages."
+            exit 1
+          fi
+
       - name: 🌍 Deploy to GitHub Pages
         if: matrix.target == 'gh-pages'
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GH_PAGES_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: deployment-artifacts/${{ inputs.projectName }}/WebGL
 
       # ───── Steam ─────
@@ -197,7 +205,16 @@ jobs:
           echo "### 📦 Deployment: ${{ matrix.target }}" >> $GITHUB_STEP_SUMMARY
           echo "- Project: \`${{ inputs.projectName }}\`" >> $GITHUB_STEP_SUMMARY
           echo "- Build type: \`${{ inputs.buildType }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- Status: ✅" >> $GITHUB_STEP_SUMMARY
+
+          ARTIFACT_PATH="deployment-artifacts/${{ inputs.projectName }}"
+          if [ "$ARTIFACT_PATH" == "deployment-artifacts/" ]; then
+            echo "- Status: ⚠️ Unknown (projectName not set?)" >> $GITHUB_STEP_SUMMARY
+          elif [ -d "$ARTIFACT_PATH" ]; then
+            echo "- Status: ✅ Success" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Status: ❌ Failed (No deployment artifacts found)" >> $GITHUB_STEP_SUMMARY
+          fi
+
 
   deploy_macOS:
     if: contains(fromJson(inputs.deployTargets), 'testflight')

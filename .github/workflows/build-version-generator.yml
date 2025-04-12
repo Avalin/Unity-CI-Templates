@@ -28,17 +28,24 @@ jobs:
         shell: bash
         run: |
           if [ "${{ inputs.buildType }}" = "release" ]; then
-            VERSION=$(echo "${GITHUB_REF}" | sed 's/refs\/tags\///')
-            
-            # 🔒 Validate tag format (v1.2.3 or v1.2.3-beta etc.)
+            VERSION=$(echo "${GITHUB_REF}" | sed 's#refs/tags/##')
+
+            # 🔒 Validate tag format (v1.2.3 or v1.2.3-beta)
             if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9\.-]+)?$ ]]; then
               echo "❌ Invalid tag format: $VERSION"
               exit 1
             fi
           else
-            VERSION=T$(date +%Y%m%d%H%M%S)_CH${GITHUB_SHA:0:7}
+            # 🕵️ Detect PR number from GITHUB_REF
+            if [[ "$GITHUB_REF" =~ ^refs/pull/([0-9]+)/merge$ ]]; then
+              VERSION="pr${BASH_REMATCH[1]}"
+            # 🕵️ Detect branch name as fallback
+            else
+              BRANCH_NAME=$(echo "${GITHUB_REF##refs/heads/}" | tr '/' '-')
+              VERSION="manual-${BRANCH_NAME}"
+            fi
           fi
 
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "📦 Determined version: ${VERSION}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Determined version: $VERSION"

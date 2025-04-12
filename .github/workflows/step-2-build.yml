@@ -144,12 +144,42 @@ jobs:
     needs:
       - build_on_ubuntu
       - build_on_macos
+      - filter_platforms
     if: always()
     steps:
-      - name: Write Build Summary
+      - name: 📋 Write Build Summary
         run: |
-          echo "### 📦 Unity Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Unity Build Pipeline Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          echo "- 🐧 Ubuntu Build: ${{ needs.build_on_ubuntu.result == 'success' && '✅ Success' || '❌ Failed or Skipped' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 🍏 macOS Build: ${{ needs.build_on_macos.result == 'success' && '✅ Success' || '❌ Failed or Skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "### 🐧 Ubuntu Platforms Attempted" >> $GITHUB_STEP_SUMMARY
+          ubuntu_list="${{ needs.filter_platforms.outputs.ubuntuPlatforms }}"
+          if [[ "$ubuntu_list" == "[]" ]]; then
+            echo "- ⏭️ None" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Platforms: \`$(echo "$ubuntu_list" | jq -r '.[]' | paste -sd ', ')`\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          case "${{ needs.build_on_ubuntu.result }}" in
+            success) echo "- Build Status: ✅ Success" >> $GITHUB_STEP_SUMMARY ;;
+            skipped) echo "- Build Status: ⏭️ Skipped (No Ubuntu targets)" >> $GITHUB_STEP_SUMMARY ;;
+            *)       echo "- Build Status: ❌ One or more Ubuntu builds failed" >> $GITHUB_STEP_SUMMARY ;;
+          esac
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### 🍏 macOS Platforms Attempted" >> $GITHUB_STEP_SUMMARY
+          mac_list="${{ needs.filter_platforms.outputs.macPlatforms }}"
+          if [[ "$mac_list" == "[]" ]]; then
+            echo "- ⏭️ None" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- Platforms: \`$(echo "$mac_list" | jq -r '.[]' | paste -sd ', ')`\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          case "${{ needs.build_on_macos.result }}" in
+            success) echo "- Build Status: ✅ Success" >> $GITHUB_STEP_SUMMARY ;;
+            skipped) echo "- Build Status: ⏭️ Skipped (No macOS targets)" >> $GITHUB_STEP_SUMMARY ;;
+            *)       echo "- Build Status: ❌ One or more macOS builds failed" >> $GITHUB_STEP_SUMMARY ;;
+          esac
+
