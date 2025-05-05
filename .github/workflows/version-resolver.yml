@@ -99,11 +99,21 @@ jobs:
 
           # Branch-based manual or CI build
           elif [[ "$REF" =~ ^refs/heads/(.+)$ ]]; then
-            BRANCH_NAME=$(echo "${BASH_REMATCH[1]}" | tr '/' '-')
+            BRANCH_NAME="${BASH_REMATCH[1]}"
+            SAFE_BRANCH_NAME=$(echo "${BRANCH_NAME}" | tr '/' '-')
+
             if [[ "$EVENT" == "workflow_dispatch" ]]; then
-              VERSION="manual-${BRANCH_NAME}"
+              PR_VERSION=$(./.github/scripts/versioning/detect-pr-number-on-branch.sh "${BRANCH_NAME}" "${GITHUB_REPOSITORY}" "${GITHUB_TOKEN}")
+
+              if [[ -n "${PR_VERSION}" ]]; then
+                  VERSION="${PR_VERSION}"
+                  echo "✅ Using detected PR version: ${VERSION}"
+              else
+                  VERSION="manual-${SAFE_BRANCH_NAME}"
+                  echo "ℹ️ No open PR found — using fallback version: ${VERSION}"
+              fi
             else
-              VERSION="${BRANCH_NAME}"
+              VERSION="${SAFE_BRANCH_NAME}"
             fi
 
           # Fallback to short commit SHA
