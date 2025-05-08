@@ -65,13 +65,10 @@ jobs:
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
       - name: Check last commit for [skip ci]   
         id: check
         run: |
-          COMMIT_MSG=$(git log -1 --pretty=%B)
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
           echo "Last commit message: $COMMIT_MSG"
 
           if [[ "$COMMIT_MSG" == *"[skip ci]"* || "$COMMIT_MSG" == *"[ci skip]"* ]]; then
@@ -137,8 +134,12 @@ jobs:
     if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Workflows Only
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/workflows
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
 
       - name: Install GitHub CLI
         run: sudo apt-get install gh -y

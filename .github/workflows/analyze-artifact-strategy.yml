@@ -29,7 +29,11 @@ jobs:
     steps:
       - name: 📅 Checkout config
         uses: actions/checkout@v4
-
+        with:
+          sparse-checkout: .github/config
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
+    
       - name: 🧰 Analyze Targets
         id: analyze
         run: |
