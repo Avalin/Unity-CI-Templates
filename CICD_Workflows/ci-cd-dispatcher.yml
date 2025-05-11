@@ -111,7 +111,7 @@ jobs:
     needs: 
       - validation
     if: ${{ needs.validation.outputs.should_run == 'true'}}
-    uses: avalin/unity-ci-templates/.github/workflows/prepare-metadata.yml@main
+    uses: avalin/unity-ci-templates/.github/workflows/prepare-metadata.yml@v1
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
       projectName: ${{ vars.PROJECT_NAME }}
@@ -127,7 +127,7 @@ jobs:
       - validation
       - prepare_metadata
     if: ${{ needs.validation.outputs.should_run == 'true'}}
-    uses: avalin/unity-ci-templates/.github/workflows/build-version-tagger.yml@main
+    uses: avalin/unity-ci-templates/.github/workflows/build-version-tagger.yml@v1
     with:
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       buildVersion: ${{ needs.prepare_metadata.outputs.buildVersion }}

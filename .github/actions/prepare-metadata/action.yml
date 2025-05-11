@@ -110,21 +110,21 @@ runs:
   steps:
     - name: 📦 Resolve Project Name
       id: project_name
-      uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@main
+      uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@v1
       with:
         projectNameInput: ${{ inputs.projectNameInput }}
         projectNameRepoVar: ${{ inputs.projectNameRepoVar }}
 
     - name: 📦 Resolve Unity Version
       id: unity_version
-      uses: avalin/unity-ci-templates/.github/actions/resolve-unity-version@main
+      uses: avalin/unity-ci-templates/.github/actions/resolve-unity-version@v1
       with:
         unityVersionInput: ${{ inputs.unityVersionInput }}
         unityVersionRepoVar: ${{ inputs.unityVersionRepoVar }}
 
     - name: ⚙️ Resolve CI Options
       id: ci_options
-      uses: avalin/unity-ci-templates/.github/actions/resolve-ci-config@main
+      uses: avalin/unity-ci-templates/.github/actions/resolve-ci-config@v1
       with:
         useGitLfsInput: ${{ inputs.useGitLfsInput }}
         useGitLfsRepoVar: ${{ inputs.useGitLfsRepoVar }}
@@ -137,7 +137,7 @@ runs:
 
     - name: 📦 Resolve Test Config
       id: test_config
-      uses: avalin/unity-ci-templates/.github/actions/resolve-test-config@main
+      uses: avalin/unity-ci-templates/.github/actions/resolve-test-config@v1
       with:
         editModePathInput: ${{ inputs.editModePathInput }}
         editModePathRepoVar: ${{ inputs.editModePathRepoVar }}
@@ -146,13 +146,13 @@ runs:
 
     - name: 📦 Resolve Build Type
       id: build_type
-      uses: avalin/unity-ci-templates/.github/actions/resolve-build-type@main
+      uses: avalin/unity-ci-templates/.github/actions/resolve-build-type@v1
       with:
         buildTypeOverride: ${{ inputs.buildTypeInput }}
 
     - name: 📦 Resolve Timeouts
       id: timeouts
-      uses: avalin/unity-ci-templates/.github/actions/resolve-timeouts@main
+      uses: avalin/unity-ci-templates/.github/actions/resolve-timeouts@v1
       with:
         timeoutTestsInput: ${{ inputs.timeoutTestsInput }}
         timeoutTestsRepoVar: ${{ inputs.timeoutTestsRepoVar }}
@@ -161,7 +161,7 @@ runs:
 
     - name: 📦 Resolve Retention Days
       id: retention
-      uses: avalin/unity-ci-templates/.github/actions/resolve-retention-days@main
+      uses: avalin/unity-ci-templates/.github/actions/resolve-retention-days@v1
       with:
         buildType: ${{ steps.build_type.outputs.buildType }}
         retentionDaysReleaseRepoVar: ${{ inputs.retentionDaysReleaseRepoVar }}
@@ -170,7 +170,7 @@ runs:
 
     - name: 📦 Resolve Build Targets
       id: build_targets
-      uses: avalin/unity-ci-templates/.github/actions/resolve-build-targets@main
+      uses: avalin/unity-ci-templates/.github/actions/resolve-build-targets@v1
       with:
         buildType: ${{ steps.build_type.outputs.buildType }}
         buildTargetsInput: ${{ inputs.buildTargetsInput }}
@@ -178,7 +178,7 @@ runs:
 
     - name: 📦 Resolve Deploy Targets
       id: deploy_targets
-      uses: avalin/unity-ci-templates/.github/actions/validate-deploy-targets@main
+      uses: avalin/unity-ci-templates/.github/actions/validate-deploy-targets@v1
       with:
         buildType: ${{ steps.build_type.outputs.buildType }}
         buildTargets: ${{ steps.build_targets.outputs.buildTargets }}
@@ -186,7 +186,7 @@ runs:
 
     - name: 📦 Analyze Artifact Strategy
       id: artifact_strategy
-      uses: avalin/unity-ci-templates/.github/actions/analyze-artifact-strategy@main
+      uses: avalin/unity-ci-templates/.github/actions/analyze-artifact-strategy@v1
       with:
         deployTargets: ${{ steps.deploy_targets.outputs.deployTargets }}
         artifactSource: ${{ inputs.artifactSource }}
