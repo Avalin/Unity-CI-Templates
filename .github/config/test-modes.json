@@ -1,0 +1,13 @@
+[
+    {
+      "mode": "EditMode",
+      "path": "Assets/Tests/Editor",
+      "runner": "unity-tests-runner"
+    },
+    {
+      "mode": "PlayMode",
+      "path": "Assets/Tests/PlayMode",
+      "runner": "unity-tests-runner"
+    }
+]
+  
