@@ -36,16 +36,15 @@ mkdir -p "${DEST_DIR}"
 # ────────────────────────────
 # Fetch Release Metadata
 # ────────────────────────────
-ASSETS_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${VERSION}"
-echo "📡 Fetching release assets from: ${ASSETS_URL}"
-
-RELEASE_DATA=$(curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${ASSETS_URL}")
+echo "📡 Fetching release assets from GitHub CLI"
+RELEASE_DATA=$(GH_TOKEN="${GITHUB_TOKEN}" gh api -H "Accept: application/vnd.github+json" \
+  "repos/${GITHUB_REPOSITORY}/releases/tags/${VERSION}")
 
 # ────────────────────────────
 # Extract URLs
 # ────────────────────────────
 echo "🔍 Extracting asset download URLs..."
-ASSETS=$(echo "${RELEASE_DATA}" | jq -r '.assets[] | "\(.name) \(.browser_download_url)"')
+ASSETS=$(echo "${RELEASE_DATA}" | jq -r '.assets[] | "\(.name) \(.url)"')
 
 if [[ -z "${ASSETS}" ]]; then
   echo "❌ No assets found for tag ${VERSION}"
@@ -63,7 +62,9 @@ if [[ "${HAS_COMBINED_ARTIFACTS}" == "true" ]]; then
   while read -r NAME URL; do
     if [[ "${NAME}" == *-all-platforms.zip ]]; then
       echo "⬇️ Downloading combined artifact: ${NAME}"
-      curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${URL}" -o "${DEST_DIR}/${NAME}"
+      GH_TOKEN="${GITHUB_TOKEN}" gh api "${URL}" \
+        -H "Accept: application/octet-stream" > "${DEST_DIR}/${NAME}"
+
       echo "📂 Extracting ${NAME} into ${DEST_DIR}"
       unzip -q "${DEST_DIR}/${NAME}" -d "${DEST_DIR}"
       rm "${DEST_DIR}/${NAME}"
@@ -80,7 +81,6 @@ if [[ "${HAS_COMBINED_ARTIFACTS}" == "true" ]]; then
 else
   echo "📦 Downloading and extracting per-build-target artifacts..."
 
-  # Convert REQUIRED_BUILD_TARGETS_JSON into a bash array
   REQUIRED_BUILD_TARGETS=($(echo "${REQUIRED_BUILD_TARGETS_JSON}" | jq -r '.[]'))
 
   for TARGET in "${REQUIRED_BUILD_TARGETS[@]}"; do
@@ -93,7 +93,8 @@ else
     fi
 
     echo "⬇️ Downloading: ${ARTIFACT_NAME}"
-    curl -sSL -H "Authorization: token ${GITHUB_TOKEN}" "${ARTIFACT_URL}" -o "${DEST_DIR}/${ARTIFACT_NAME}"
+    GH_TOKEN="${GITHUB_TOKEN}" gh api "${ARTIFACT_URL}" \
+      -H "Accept: application/octet-stream" > "${DEST_DIR}/${ARTIFACT_NAME}"
 
     echo "📂 Extracting ${ARTIFACT_NAME} to ${DEST_DIR}/${SANITIZED_PROJECT_NAME}-${VERSION}-${TARGET}"
     mkdir -p "${DEST_DIR}/${SANITIZED_PROJECT_NAME}-${VERSION}-${TARGET}"

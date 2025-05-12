@@ -30,22 +30,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  filter_build_targets:
-    uses: ./.github/workflows/validate-build-targets.yml
-    with:
-      buildTargets: ${{ inputs.buildTargets }}
+  resolve_build_targets:
+    name: Resolve Build Targets
+    runs-on: ubuntu-latest
+    outputs:
+      build_targets: ${{ steps.resolve_build_targets.outputs.buildTargets }}
+    steps:
+      - name: Resolve Build Targets
+        id: resolve_build_targets
+        uses: avalin/unity-ci-templates/.github/actions/resolve-build-targets@main
+        with:
+          buildType: ${{ inputs.buildType }}
+          buildTargetsInput: ${{ inputs.buildTargets }}
+          buildTargetsRepoVar: ${{ vars.BUILD_TARGETS }}
 
   generate_matrix:
     name: 🧮 Generate Dry Build Matrix
     runs-on: ubuntu-latest
-    needs: [ filter_build_targets ]
+    needs: [ resolve_build_targets ]
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: 🧮 Create Dry Build Matrix
         id: set-matrix
         run: |
-          grouped='${{ needs.filter_build_targets.outputs.validBuildTargets }}'
+          grouped='${{ needs.resolve_build_targets.outputs.build_targets }}'
           echo "📦 Grouped targets: $grouped"
       
           matrix=$(echo "$grouped" | jq -c '
@@ -93,12 +102,12 @@ jobs:
       retentionDays: ${{ inputs.retentionDays }}
 
   summarize_builds:
-    needs: [ filter_build_targets, dry_build_targets, combine_builds ]
+    needs: [ resolve_build_targets, dry_build_targets, combine_builds ]
     if: always()
     uses: ./.github/workflows/summarize-builds.yml
     with:
       projectName: ${{ inputs.projectName }}
       buildVersion: ${{ inputs.buildVersion }}
-      groupedBuildTargets: ${{ needs.filter_build_targets.outputs.validBuildTargets }}
+      groupedBuildTargets: ${{ needs.resolve_build_targets.outputs.build_targets }}
       combineRequested: ${{ inputs.combineArtifacts }}
       combinedCreated: ${{ (needs.combine_builds.result == 'success' && needs.combine_builds.outputs.created) || 'false' }}

@@ -27,7 +27,7 @@ jobs:
       - name: 📡 Setup Git (fetch tags + default branch)
         run: |
           git init
-          git remote add origin https://github.com/${{ github.repository }}
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
           git fetch origin --tags --force
           git fetch origin $(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
           git checkout $(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')

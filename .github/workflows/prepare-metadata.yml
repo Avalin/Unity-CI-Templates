@@ -123,13 +123,36 @@ jobs:
           quietModeRepoVar: ${{ vars.UNITY_TESTS_QUIET_MODE }}
           excludeUnityTestsRepoVar: ${{ vars.EXCLUDE_UNITY_TESTS }}
 
-      - name: 🔍 Resolve Tests-Only Mode
+      - name: ✅ Validate Build Targets For Pipeline Intent
+        env:
+          INPUT_BUILD_TARGETS: ${{ inputs.buildTargets }}
+          REPO_VAR_BUILD_TARGETS: ${{ vars.BUILD_TARGETS }}
+          FINAL_BUILD_TARGETS: ${{ steps.metadata.outputs.buildTargets }}
+        run: |
+          echo "🔍 Validating resolved build targets..."
+
+          if [[ "$FINAL_BUILD_TARGETS" == "[]" || "$FINAL_BUILD_TARGETS" == "" || "$FINAL_BUILD_TARGETS" == "null" ]]; then
+            echo "📥 Raw input.buildTargets: ${INPUT_BUILD_TARGETS}"
+            echo "🏛️ Repository variable BUILD_TARGETS: ${REPO_VAR_BUILD_TARGETS}"
+            echo "🧮 Resolved buildTargets: ${FINAL_BUILD_TARGETS}"
+            echo ""
+            echo "❌ No valid build targets were resolved, and this run is not marked as 'tests-only'."
+            echo "💡 To fix:"
+            echo "   • Set 'testsOnly: true' if this is a test-only run."
+            echo "   • Or provide 'buildTargets' as a valid JSON array input (e.g. [\"WebGL\"])."
+            echo "   • Or define the 'BUILD_TARGETS' repository variable with valid JSON."
+            exit 1
+          fi
+
+          echo "✅ Valid build targets detected: ${FINAL_BUILD_TARGETS}"
+
+      - name: 🔍 Detect Tests-Only Mode
         id: tests_only
         uses: avalin/unity-ci-templates/.github/actions/detect-tests-only@main
         with:
           testsOnlyInput: ${{ inputs.testsOnly }}
 
-      - name: 🔍 Resolve Skip Tests Flag
+      - name: 🔍 Detect Skip Tests Flag
         id: skip_tests
         uses: avalin/unity-ci-templates/.github/actions/detect-skip-tests@main
         with:
