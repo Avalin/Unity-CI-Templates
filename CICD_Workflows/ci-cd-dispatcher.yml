@@ -60,7 +60,7 @@ permissions:
 
 jobs:
   validation:
-    name: Check Skip CI triggers
+    name: Validate CI Configurations
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
