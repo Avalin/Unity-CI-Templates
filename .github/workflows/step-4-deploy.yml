@@ -34,6 +34,7 @@ on:
         default: 'build'
         type: string
     secrets:
+      CICD_PAT: { required: true }
       DEPLOY_API_KEY: { required: false }
       ITCH_USERNAME: { required: false }
       ITCH_PROJECT: { required: false }
@@ -42,7 +43,6 @@ on:
       AWS_ACCESS_KEY_ID: { required: false }
       AWS_SECRET_ACCESS_KEY: { required: false }
       S3_BUCKET: { required: false }
-      GH_PAGES_TOKEN: { required: false }
       STEAM_USERNAME: { required: false }
       STEAM_PASSWORD: { required: false }
       STEAM_APP_ID: { required: false }
@@ -79,7 +79,7 @@ jobs:
           projectName: ${{ inputs.projectName }}
           version: ${{ inputs.buildVersion }}
           githubRepository: ${{ github.repository }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          githubToken: ${{ secrets.CICD_PAT }}
           hasCombinedArtifacts: ${{ inputs.hasCombinedArtifacts }}
           requiredBuildTargetsJson: '${{ toJson(matrix.requiredBuildTargets) }}'
 
@@ -100,7 +100,7 @@ jobs:
           version: ${{ inputs.buildVersion }}
           requiredBuildTargets: '${{ toJson(matrix.requiredBuildTargets) }}'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CICD_PAT }}
 
       - name: 🛠️ Normalize Artifact Layout (Release Per-Build-Target Only)
         if: ${{ inputs.artifactSource == 'release' && inputs.hasCombinedArtifacts == 'false' }}
@@ -136,7 +136,7 @@ jobs:
         if: matrix.target == 'gh-pages'
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.CICD_PAT }}
           publish_dir: "./${{ env.ARTIFACT_DIR }}/WebGL"
 
       # ───── itch.io ─────
