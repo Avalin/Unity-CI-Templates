@@ -106,7 +106,9 @@ jobs:
 
   summarize_tests:
     name: 📄 Summarize Test Results
-    needs: [run_editmode, run_playmode]
+    needs: 
+      - run_editmode
+      - run_playmode
     if: |
       always() &&
       (
