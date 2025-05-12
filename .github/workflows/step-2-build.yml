@@ -68,7 +68,7 @@ jobs:
     name: Build for ${{ matrix.buildTarget }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ inputs.timeoutMinutes }}
-    needs: [ generate_matrix ]
+    needs: generate_matrix
     strategy:
       fail-fast: false
       matrix:
