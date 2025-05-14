@@ -38,7 +38,6 @@ on:
         required: false
   # Automatically run tests & builds on certain branches or PR changes
   push:
-    branches: main
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'            # matches v1.2.3
       - 'v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'  # matches v1.2.3-rc.1

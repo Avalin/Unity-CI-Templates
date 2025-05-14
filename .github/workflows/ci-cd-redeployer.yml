@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: Run Project Name Sanitizer
         id: sanitize
-        uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@v1
+        uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@main
         with:
           projectNameInput: ${{ vars.PROJECT_NAME }}
 

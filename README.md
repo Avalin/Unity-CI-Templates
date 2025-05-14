@@ -16,14 +16,15 @@ See a live WebGL build deployed using this CI/CD pipeline:
 > Deployed via GitHub Pages using the `gh-pages` deploy target.
 
 
-## 🧠 Getting Started
+## 🚀 Getting Started
 
-1️⃣ Make sure your Unity project is in a GitHub repository<br/>
-2️⃣ Copy the required GitHub Actions workflows from the CICD_Workflows folder<br/>
-2️⃣ Add it to your repository at path: .github → workflows (create folders if they're missing)<br/>
-3️⃣ Configure the needed secrets and variables (optional)<br/>
-4️⃣ Review the wiki pages here to understand the versioning, deployment, and customization options<br/>
-5️⃣ Try dispatching the `ci-cd-dispatcher.yml` workflow or push a Git tag using semver to see the pipeline in action!<br/>
+1️⃣ Ensure your Unity project is in a GitHub repository  
+2️⃣ Copy the required GitHub Actions workflows from the [CICD_Workflows folder](https://github.com/Avalin/Unity-CI-Templates/tree/main/CICD_Workflows)  
+3️⃣ Add them to your repository at path: **.github → workflows** _(create folders if missing)_<br/>
+4️⃣ Configure the [required secrets](https://github.com/Avalin/Unity-CI-Templates/wiki/Required-Secrets) in your repository<br/>
+5️⃣ Read and optionally setup [repository variables](https://github.com/Avalin/Unity-CI-Templates/wiki/Repository-Variables), they're important to understand the inputs for the workflow dispatch<br/>
+6️⃣ Try dispatching the `ci-cd-dispatcher.yml` workflow or push a Git tag using [SemVer](https://github.com/Avalin/Unity-CI-Templates/wiki/Versioning-&-Tagging) to see the pipeline in action! <br/>
+
 > ⚠️ Currently tested deploy targets: `gh-pages` (WebGL only). Others are implemented but not yet fully verified. Contributions welcome!
 
 ## 📖 Documentation
@@ -59,7 +60,7 @@ While the pipeline is production-ready and modular, some deploy integrations are
   Some targets (like itch.io, Firebase, S3) require correctly configured secrets and accounts - be sure to test deploy flows in a safe sandbox environment before pushing to production.
 
 - 🧪 **Unity version compatibility**  
-  Currently optimized for Unity 2022.3+, tested with Unity 6 too, but older versions may work with minor adjustments.
+  Currently optimized for Unity 2022.3+, tested with Unity 6 too, but older versions may work as well.
 
 > **Contributions and testing feedback are welcome!**  
 > If you successfully validate additional targets or add new ones, please consider opening a PR to improve support for the community.
