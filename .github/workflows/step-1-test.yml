@@ -63,10 +63,16 @@ jobs:
 
   detect_tests:
     name: 🔍 Detect Tests
-    uses: ./.github/workflows/unity-tests-detection.yml
-    with:
-      editModePath: ${{ inputs.editModePath }}
-      playModePath: ${{ inputs.playModePath }}
+    runs-on: ubuntu-latest
+    outputs:
+      has_editmode: ${{ steps.detect.outputs.has_editmode }}
+      has_playmode: ${{ steps.detect.outputs.has_playmode }}
+    steps:
+      - id: detect
+        uses: avalin/unity-ci-templates/.github/actions/detect-tests-existence@main
+        with:
+          editModePath: ${{ inputs.editModePath }}
+          playModePath: ${{ inputs.playModePath }}
 
   run_editmode:
     name: 🥪 EditMode Tests
@@ -100,7 +106,9 @@ jobs:
 
   summarize_tests:
     name: 📄 Summarize Test Results
-    needs: [run_editmode, run_playmode]
+    needs: 
+      - run_editmode
+      - run_playmode
     if: |
       always() &&
       (

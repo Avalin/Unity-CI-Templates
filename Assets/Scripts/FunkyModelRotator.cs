@@ -32,7 +32,7 @@ public class FunkyModelRotator : MonoBehaviour
         }
         else
         {
-            // Apply damping to the rotation velocity
+            // Apply damping to rotation velocity
             rotationVelocity = Vector3.Lerp(
                 rotationVelocity,
                 Vector3.zero,

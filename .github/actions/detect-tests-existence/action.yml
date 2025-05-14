@@ -1,0 +1,47 @@
+name: 'Detect Unity Tests Existence'
+description: 'Detects if Unity EditMode or PlayMode test files exist'
+inputs:
+  editModePath:
+    description: 'Path to EditMode tests'
+    required: false
+    default: 'Assets/Tests/Editor'
+  playModePath:
+    description: 'Path to PlayMode tests'
+    required: false
+    default: 'Assets/Tests/PlayMode'
+outputs:
+  has_editmode:
+    description: 'Whether EditMode tests exist'
+    value: ${{ steps.edit.outputs.found }}
+  has_playmode:
+    description: 'Whether PlayMode tests exist'
+    value: ${{ steps.play.outputs.found }}
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - id: edit
+      shell: bash
+      run: |
+        if find "${{ inputs.editModePath }}" -name '*.cs' | grep -q .; then
+          echo "found=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "found=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - id: play
+      shell: bash
+      run: |
+        if find "${{ inputs.playModePath }}" -name '*.cs' | grep -q .; then
+          echo "found=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "found=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Log Detected Tests
+      shell: bash
+      run: |
+        echo "🧪 EditMode tests found: ${{ steps.edit.outputs.found }}"
+        echo "🎮 PlayMode tests found: ${{ steps.play.outputs.found }}"

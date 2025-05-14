@@ -1,0 +1,192 @@
+name: Prepare Metadata
+description: Bundles all key resolvers into one unified action, reducing repeated checkouts.
+
+inputs:
+  artifactSource:
+    required: true
+
+  # Project & Unity
+  projectNameInput:
+    required: true
+  projectNameRepoVar:
+    required: true
+  unityVersionInput:
+    required: false
+  unityVersionRepoVar:
+    required: false
+
+  # Pipeline-wide flags
+  useGitLfsInput:
+    required: false
+  useGitLfsRepoVar:
+    required: false
+  quietModeInput:
+    required: false
+  quietModeRepoVar:
+    required: false
+  excludeUnityTestsInput:
+    required: false
+  excludeUnityTestsRepoVar:
+    required: false
+  forceCombineArtifactsInput:
+    required: false
+  forceCombineArtifactsRepoVar:
+    required: false
+
+  # Test-specific
+  editModePathInput:
+    required: false
+  editModePathRepoVar:
+    required: false
+  playModePathInput:
+    required: false
+  playModePathRepoVar:
+    required: false
+
+  # Build & timeouts
+  buildTypeInput:
+    required: false
+  timeoutTestsInput:
+    required: false
+  timeoutTestsRepoVar:
+    required: false
+  timeoutBuildInput:
+    required: false
+  timeoutBuildRepoVar:
+    required: false
+
+  # Retention & targets
+  retentionDaysReleaseRepoVar:
+    required: false
+  retentionDaysRcRepoVar:
+    required: false
+  retentionDaysPreviewRepoVar:
+    required: false
+  buildTargetsInput:
+    required: false
+  buildTargetsRepoVar:
+    required: false
+  deployTargetsInput:
+    required: false
+  deployTargetsRepoVar:
+    required: false
+
+outputs:
+  projectName:
+    value: ${{ steps.project_name.outputs.sanitized_name }}
+  unityVersion:
+    value: ${{ steps.unity_version.outputs.unityVersion }}
+  buildType:
+    value: ${{ steps.build_type.outputs.buildType }}
+  timeoutMinutesTests:
+    value: ${{ steps.timeouts.outputs.timeoutMinutesTests }}
+  timeoutMinutesBuild:
+    value: ${{ steps.timeouts.outputs.timeoutMinutesBuild }}
+  retentionDays:
+    value: ${{ steps.retention.outputs.retentionDays }}
+  buildTargets:
+    value: ${{ steps.build_targets.outputs.buildTargets }}
+  deployTargets:
+    value: ${{ steps.deploy_targets.outputs.deployTargets }}
+  requiresCombinedArtifact:
+    value: ${{ steps.artifact_strategy.outputs.requiresCombined }}
+  skipPerBuildTargetArtifact:
+    value: ${{ steps.artifact_strategy.outputs.skipPerBuildTarget }}
+  useGitLfs:
+    value: ${{ steps.ci_options.outputs.useGitLfs }}
+  editModePath:
+    value: ${{ steps.test_config.outputs.editModePath }}
+  playModePath:
+    value: ${{ steps.test_config.outputs.playModePath }}
+  quietMode:
+    value: ${{ steps.ci_options.outputs.quietMode }}
+  forceCombineArtifacts:
+    value: ${{ steps.ci_options.outputs.forceCombineArtifacts }}
+  excludeUnityTests:
+    value: ${{ steps.ci_options.outputs.excludeUnityTests }}
+
+runs:
+  using: composite
+  steps:
+    - name: 📦 Resolve Project Name
+      id: project_name
+      uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@v1
+      with:
+        projectNameInput: ${{ inputs.projectNameInput }}
+        projectNameRepoVar: ${{ inputs.projectNameRepoVar }}
+
+    - name: 📦 Resolve Unity Version
+      id: unity_version
+      uses: avalin/unity-ci-templates/.github/actions/resolve-unity-version@v1
+      with:
+        unityVersionInput: ${{ inputs.unityVersionInput }}
+        unityVersionRepoVar: ${{ inputs.unityVersionRepoVar }}
+
+    - name: ⚙️ Resolve CI Options
+      id: ci_options
+      uses: avalin/unity-ci-templates/.github/actions/resolve-ci-config@v1
+      with:
+        useGitLfsInput: ${{ inputs.useGitLfsInput }}
+        useGitLfsRepoVar: ${{ inputs.useGitLfsRepoVar }}
+        quietModeInput: ${{ inputs.quietModeInput }}
+        quietModeRepoVar: ${{ inputs.quietModeRepoVar }}
+        excludeUnityTestsInput: ${{ inputs.excludeUnityTestsInput }}
+        excludeUnityTestsRepoVar: ${{ inputs.excludeUnityTestsRepoVar }}
+        forceCombineArtifactsInput: ${{ inputs.forceCombineArtifactsInput }}
+        forceCombineArtifactsRepoVar: ${{ inputs.forceCombineArtifactsRepoVar }}
+
+    - name: 📦 Resolve Test Config
+      id: test_config
+      uses: avalin/unity-ci-templates/.github/actions/resolve-test-config@v1
+      with:
+        editModePathInput: ${{ inputs.editModePathInput }}
+        editModePathRepoVar: ${{ inputs.editModePathRepoVar }}
+        playModePathInput: ${{ inputs.playModePathInput }}
+        playModePathRepoVar: ${{ inputs.playModePathRepoVar }}
+
+    - name: 📦 Resolve Build Type
+      id: build_type
+      uses: avalin/unity-ci-templates/.github/actions/resolve-build-type@v1
+      with:
+        buildTypeOverride: ${{ inputs.buildTypeInput }}
+
+    - name: 📦 Resolve Timeouts
+      id: timeouts
+      uses: avalin/unity-ci-templates/.github/actions/resolve-timeouts@v1
+      with:
+        timeoutTestsInput: ${{ inputs.timeoutTestsInput }}
+        timeoutTestsRepoVar: ${{ inputs.timeoutTestsRepoVar }}
+        timeoutBuildInput: ${{ inputs.timeoutBuildInput }}
+        timeoutBuildRepoVar: ${{ inputs.timeoutBuildRepoVar }}
+
+    - name: 📦 Resolve Retention Days
+      id: retention
+      uses: avalin/unity-ci-templates/.github/actions/resolve-retention-days@v1
+      with:
+        buildType: ${{ steps.build_type.outputs.buildType }}
+        retentionDaysReleaseRepoVar: ${{ inputs.retentionDaysReleaseRepoVar }}
+        retentionDaysRcRepoVar: ${{ inputs.retentionDaysRcRepoVar }}
+        retentionDaysPreviewRepoVar: ${{ inputs.retentionDaysPreviewRepoVar }}
+
+    - name: 📦 Resolve Build Targets
+      id: build_targets
+      uses: avalin/unity-ci-templates/.github/actions/resolve-build-targets@v1
+      with:
+        buildType: ${{ steps.build_type.outputs.buildType }}
+        buildTargetsInput: ${{ inputs.buildTargetsInput }}
+        buildTargetsRepoVar: ${{ inputs.buildTargetsRepoVar }}
+
+    - name: 📦 Resolve Deploy Targets
+      id: deploy_targets
+      uses: avalin/unity-ci-templates/.github/actions/validate-deploy-targets@v1
+      with:
+        buildType: ${{ steps.build_type.outputs.buildType }}
+        buildTargets: ${{ steps.build_targets.outputs.buildTargets }}
+        deployTargets: ${{ inputs.deployTargetsInput || inputs.deployTargetsRepoVar || '[]'}}
+
+    - name: 📦 Analyze Artifact Strategy
+      id: artifact_strategy
+      uses: avalin/unity-ci-templates/.github/actions/analyze-artifact-strategy@v1
+      with:
+        deployTargets: ${{ steps.deploy_targets.outputs.deployTargets }}
+        artifactSource: ${{ inputs.artifactSource }}

@@ -38,6 +38,7 @@ on:
         required: false
   # Automatically run tests & builds on certain branches or PR changes
   push:
+    branches: main
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'            # matches v1.2.3
       - 'v[0-9]+.[0-9]+.[0-9]+-rc.[0-9]+'  # matches v1.2.3-rc.1
@@ -59,8 +60,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  skip_ci:
-    name: Check Skip CI triggers
+  validation:
+    name: Validate CI Configurations
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
@@ -79,30 +80,38 @@ jobs:
             echo "should_run=true" >> "$GITHUB_OUTPUT"
           fi
 
-  validate_repository_inputs:
-    name: Validate Repository Inputs
-    needs: skip_ci
-    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
-    uses: ./.github/workflows/validate-repository-inputs.yml
-    with:
-      requiredVariables: |
-        [
-          "PROJECT_NAME",
-          "DEPLOY_TARGETS",
-          "BUILD_TARGETS"
-        ]
-    secrets:
-      CICD_PAT: ${{ secrets.CICD_PAT }}
-      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      - name: Validate Required GitHub Secrets
+        run: |
+          REQUIRED_SECRETS=("CICD_PAT" "UNITY_EMAIL" "UNITY_LICENSE" "UNITY_PASSWORD")
+          MISSING=0
+
+          for SECRET_NAME in "${REQUIRED_SECRETS[@]}"; do
+            VALUE_VAR="SECRET_${SECRET_NAME}"
+            VALUE="${!VALUE_VAR}"
+
+            if [[ -z "$VALUE" || "$VALUE" == "" ]]; then
+              echo "❌ Required secret '$SECRET_NAME' is not set!"
+              MISSING=1
+            else
+              echo "✅ Secret '$SECRET_NAME' is present."
+            fi
+          done
+
+          if [[ "$MISSING" -eq 1 ]]; then
+            echo "❌ One or more required secrets are missing. Failing..."
+            exit 1
+          fi
+        env:
+          SECRET_CICD_PAT: ${{ secrets.CICD_PAT }}
+          SECRET_UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          SECRET_UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          SECRET_UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
   prepare_metadata:
     name: Prepare Metadata
     needs: 
-      - skip_ci
-      - validate_repository_inputs
-    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
+      - validation
+    if: ${{ needs.validation.outputs.should_run == 'true'}}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
@@ -116,9 +125,9 @@ jobs:
   tagging:
     name: Create or Verify Tag
     needs: 
-      - skip_ci
+      - validation
       - prepare_metadata
-    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
+    if: ${{ needs.validation.outputs.should_run == 'true'}}
     uses: ./.github/workflows/build-version-tagger.yml
     with:
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
@@ -128,10 +137,10 @@ jobs:
   trigger_ci:
     name: Trigger CI/CD Pipeline
     needs: 
-      - skip_ci
+      - validation
       - tagging
       - prepare_metadata
-    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
+    if: ${{ needs.validation.outputs.should_run == 'true'}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Workflows Only

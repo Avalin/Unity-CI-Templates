@@ -59,19 +59,16 @@ permissions:
   pull-requests: write
 
 jobs:
-  skip_ci:
+  validation:
     name: Check Skip CI triggers
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
       - name: Check last commit for [skip ci]   
         id: check
         run: |
-          COMMIT_MSG=$(git log -1 --pretty=%B)
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
           echo "Last commit message: $COMMIT_MSG"
 
           if [[ "$COMMIT_MSG" == *"[skip ci]"* || "$COMMIT_MSG" == *"[ci skip]"* ]]; then
@@ -82,30 +79,38 @@ jobs:
             echo "should_run=true" >> "$GITHUB_OUTPUT"
           fi
 
-  validate_repository_inputs:
-    name: Validate Repository Inputs
-    needs: skip_ci
-    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
-    uses: avalin/unity-ci-templates/.github/workflows/validate-repository-inputs.yml@v1
-    with:
-      requiredVariables: |
-        [
-          "PROJECT_NAME",
-          "DEPLOY_TARGETS",
-          "BUILD_TARGETS"
-        ]
-    secrets:
-      CICD_PAT: ${{ secrets.CICD_PAT }}
-      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      - name: Validate Required GitHub Secrets
+        run: |
+          REQUIRED_SECRETS=("CICD_PAT" "UNITY_EMAIL" "UNITY_LICENSE" "UNITY_PASSWORD")
+          MISSING=0
+
+          for SECRET_NAME in "${REQUIRED_SECRETS[@]}"; do
+            VALUE_VAR="SECRET_${SECRET_NAME}"
+            VALUE="${!VALUE_VAR}"
+
+            if [[ -z "$VALUE" || "$VALUE" == "" ]]; then
+              echo "❌ Required secret '$SECRET_NAME' is not set!"
+              MISSING=1
+            else
+              echo "✅ Secret '$SECRET_NAME' is present."
+            fi
+          done
+
+          if [[ "$MISSING" -eq 1 ]]; then
+            echo "❌ One or more required secrets are missing. Failing..."
+            exit 1
+          fi
+        env:
+          SECRET_CICD_PAT: ${{ secrets.CICD_PAT }}
+          SECRET_UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          SECRET_UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          SECRET_UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
   prepare_metadata:
     name: Prepare Metadata
     needs: 
-      - skip_ci
-      - validate_repository_inputs
-    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
+      - validation
+    if: ${{ needs.validation.outputs.should_run == 'true'}}
     uses: avalin/unity-ci-templates/.github/workflows/prepare-metadata.yml@v1
     with:
       unityVersion: ${{ vars.UNITY_VERSION }}
@@ -119,9 +124,9 @@ jobs:
   tagging:
     name: Create or Verify Tag
     needs: 
-      - skip_ci
+      - validation
       - prepare_metadata
-    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
+    if: ${{ needs.validation.outputs.should_run == 'true'}}
     uses: avalin/unity-ci-templates/.github/workflows/build-version-tagger.yml@v1
     with:
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
@@ -131,14 +136,18 @@ jobs:
   trigger_ci:
     name: Trigger CI/CD Pipeline
     needs: 
-      - skip_ci
+      - validation
       - tagging
       - prepare_metadata
-    if: ${{ needs.skip_ci.outputs.should_run == 'true'}}
+    if: ${{ needs.validation.outputs.should_run == 'true'}}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Workflows Only
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/workflows
+          sparse-checkout-cone-mode: false
+          fetch-depth: 1
 
       - name: Install GitHub CLI
         run: sudo apt-get install gh -y

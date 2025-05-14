@@ -34,6 +34,7 @@ on:
         default: 'build'
         type: string
     secrets:
+      CICD_PAT: { required: true }
       DEPLOY_API_KEY: { required: false }
       ITCH_USERNAME: { required: false }
       ITCH_PROJECT: { required: false }
@@ -42,7 +43,6 @@ on:
       AWS_ACCESS_KEY_ID: { required: false }
       AWS_SECRET_ACCESS_KEY: { required: false }
       S3_BUCKET: { required: false }
-      GH_PAGES_TOKEN: { required: false }
       STEAM_USERNAME: { required: false }
       STEAM_PASSWORD: { required: false }
       STEAM_APP_ID: { required: false }
@@ -79,7 +79,7 @@ jobs:
           projectName: ${{ inputs.projectName }}
           version: ${{ inputs.buildVersion }}
           githubRepository: ${{ github.repository }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          githubToken: ${{ secrets.CICD_PAT }}
           hasCombinedArtifacts: ${{ inputs.hasCombinedArtifacts }}
           requiredBuildTargetsJson: '${{ toJson(matrix.requiredBuildTargets) }}'
 
@@ -100,7 +100,7 @@ jobs:
           version: ${{ inputs.buildVersion }}
           requiredBuildTargets: '${{ toJson(matrix.requiredBuildTargets) }}'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CICD_PAT }}
 
       - name: 🛠️ Normalize Artifact Layout (Release Per-Build-Target Only)
         if: ${{ inputs.artifactSource == 'release' && inputs.hasCombinedArtifacts == 'false' }}
@@ -122,80 +122,21 @@ jobs:
 
       - name: 🔎 Detect WebGL Compression Format
         id: detect-compression
-        if: matrix.target == 'gh-pages'
-        run: |
-          cd "${ARTIFACT_DIR}/WebGL"
-
-          echo "🔍 Checking for compression in WebGL build..."
-
-          has_br=0
-          has_gz=0
-
-          if find . -type f -name "*.br" | grep -q .; then
-            has_br=1
-          fi
-
-          if find . -type f -name "*.gz" | grep -q .; then
-            has_gz=1
-          fi
-
-          if [ "$has_br" -eq 1 ]; then
-            echo "⚠️ WebGL build is compressed: .br files or code references likely present."
-          elif [ "$has_gz" -eq 1 ]; then
-            echo "⚠️ WebGL build is compressed: .gz files or code references likely present."
-          else
-            echo "✅ WebGL build is uncompressed (no .br/.gz files)."
-          fi
-
-          if [ "$has_br" -eq 1 ] || [ "$has_gz" -eq 1 ]; then
-            echo "needs_patch=true" >> $GITHUB_OUTPUT
-          else
-            echo "needs_patch=false" >> $GITHUB_OUTPUT
-          fi
+        uses: avalin/unity-ci-templates/.github/actions/detect-webgl-compression@v1
+        with:
+          artifactDir: ${{ env.ARTIFACT_DIR }}
 
       - name: 🩹 Patch & Decompress Unity WebGL for GitHub Pages
         if: ${{ matrix.target == 'gh-pages' && steps.detect-compression.outputs.needs_patch == 'true' }}
-        run: |
-          echo "🔧 Patching Unity WebGL files for GitHub Pages (remove .br/.gz + references)..."
-
-          # Install brotli/gzip tools if needed
-          sudo apt-get update && sudo apt-get install -y brotli gzip
-
-          cd "${{ env.ARTIFACT_DIR }}/WebGL"
-
-          # 1) Decompress any .br → original
-          find . -type f -name "*.br" | while read f; do
-            out="${f%.br}"
-            echo "Decompressing Brotli: $f → $out"
-            brotli -d -f "$f" -o "$out"
-            rm "$f"
-          done
-
-          # 2) Decompress any .gz → original
-          find . -type f -name "*.gz" | while read f; do
-            out="${f%.gz}"
-            echo "Decompressing Gzip: $f → $out"
-            gunzip -c "$f" > "$out"
-            rm "$f"
-          done
-
-          # 3) Strip out .br/.gz references and disable compressionFormat in all .js, .json, and .html
-          #    (Sometimes Unity stashes references in index.html or other JS files)
-          find . -type f \( -name "*.js" -o -name "*.json" -o -name "*.html" \) -print0 | xargs -0 sed -i \
-            -e 's/\.br//g' \
-            -e 's/\.gz//g' \
-            -e 's/compressionFormat:"br"/compressionFormat:null/g' \
-            -e 's/compressionFormat:"gzip"/compressionFormat:null/g' \
-            -e 's/"compressionFormat":"br"/"compressionFormat":null/g' \
-            -e 's/"compressionFormat":"gzip"/"compressionFormat":null/g'
-
-          echo "✅ All .br/.gz references removed; files are now uncompressed for GH Pages."
+        uses: avalin/unity-ci-templates/.github/actions/patch-webgl-for-gh-pages@v1
+        with:
+          artifactDir: ${{ env.ARTIFACT_DIR }}
 
       - name: 🌍 Deploy to GitHub Pages
         if: matrix.target == 'gh-pages'
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.CICD_PAT }}
           publish_dir: "./${{ env.ARTIFACT_DIR }}/WebGL"
 
       # ───── itch.io ─────

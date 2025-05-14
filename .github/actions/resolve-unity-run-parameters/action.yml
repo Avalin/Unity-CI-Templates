@@ -1,0 +1,35 @@
+name: Resolve GameCI Unity Parameters
+description: Resolves sanitized Unity platform and runtime parameters for GameCI builds, including headless flags for server targets.
+
+inputs:
+  buildTarget:
+    description: The logical Unity target (e.g., StandaloneLinux64-Server)
+    required: true
+
+outputs:
+  targetPlatform:
+    description: Sanitized Unity platform (used in builder)
+    value: ${{ steps.resolve.outputs.targetPlatform }}
+  customParameters:
+    description: Extra flags to pass to Unity
+    value: ${{ steps.resolve.outputs.customParameters }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: resolve
+      shell: bash
+      run: |
+        RAW_TARGET="${{ inputs.buildTarget }}"
+        PLATFORM="$RAW_TARGET"
+        PARAMS=""
+
+        if [[ "$RAW_TARGET" == *"-Server" ]]; then
+          PLATFORM="StandaloneLinux64"
+          PARAMS="-serverBuild"
+        elif [[ "$RAW_TARGET" == *"-Client" ]]; then
+          PLATFORM="StandaloneLinux64"
+        fi
+
+        echo "targetPlatform=$PLATFORM" >> "$GITHUB_OUTPUT"
+        echo "customParameters=$PARAMS" >> "$GITHUB_OUTPUT"

@@ -9,10 +9,15 @@
       "release_candidate": "CI-WebGL-RC",
       "release": "CI-WebGL-Release"
     },
-    "StandaloneLinux64": {
-      "preview": "CI-Linux-Preview",
+    "StandaloneLinux64-Client": {
+      "preview": "CI-LinuxClient-Preview",
       "release_candidate": "CI-Linux-RC",
-      "release": "CI-Linux-Release"
+      "release": "CI-LinuxClient-Release"
+    },
+    "StandaloneLinux64-Server": {
+      "preview": "CI-LinuxServer-Preview",
+      "release_candidate": "CI-LinuxServer-RC",
+      "release": "CI-LinuxServer-Release"
     },
     "StandaloneWindows": {
       "preview": "CI-Windows-Preview",

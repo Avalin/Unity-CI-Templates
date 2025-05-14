@@ -32,7 +32,7 @@ on:
       buildTargets:
         description: "JSON array of build targets to build for"
         required: true
-        default: '["Android", "WebGL", "StandaloneLinux64", "StandaloneWindows", "StandaloneWindows64", "StandaloneOSX", "iOS"]'
+        default: '["Android", "WebGL", "StandaloneLinux64-Client", "StandaloneLinux64-Server", "StandaloneWindows", "StandaloneWindows64", "StandaloneOSX", "iOS"]'
       deployTargets:
         description: "JSON array of deploy targets (e.g. [\"itch.io\",\"s3\"])"
         required: true
