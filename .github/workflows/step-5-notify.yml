@@ -70,7 +70,7 @@ jobs:
 
       # ───── Slack ─────
       - name: 📢 Send Slack Notification (if configured)
-        if: ${{ secrets.SLACK_WEBHOOK != '' }}
+        if: ${{ env.SLACK_WEBHOOK != '' }}
         continue-on-error: true
         run: |
           case "${{ steps.generate_notification.outputs.status }}" in
@@ -103,7 +103,7 @@ jobs:
 
       # ───── Discord ─────
       - name: 📢 Send Discord Notification (if configured)
-        if: ${{ secrets.DISCORD_WEBHOOK != '' }}
+        if: ${{ env.DISCORD_WEBHOOK != '' }}
         continue-on-error: true
         run: |
           TEXT=$'${{ steps.generate_notification.outputs.discordMessage }}'
