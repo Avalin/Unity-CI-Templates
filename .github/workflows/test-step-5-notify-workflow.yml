@@ -146,4 +146,6 @@ jobs:
       testsTotal: ${{ needs.dry_tests.outputs.totalTests }}
       testsPassed: ${{ needs.dry_tests.outputs.passedTests }}
       testsFailedNames: ${{ needs.dry_tests.outputs.failedTestNames }}
-    secrets: inherit
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}

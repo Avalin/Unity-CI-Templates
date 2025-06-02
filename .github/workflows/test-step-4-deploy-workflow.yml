@@ -133,7 +133,26 @@ jobs:
       buildTargets: ${{ inputs.buildTargets }}
       hasCombinedArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
       artifactSource: ${{ inputs.artifactSource }}
-    secrets: inherit
+    secrets:
+      CICD_PAT: ${{ secrets.CICD_PAT }}
+      DEPLOY_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
+      ITCH_USERNAME: ${{ secrets.ITCH_USERNAME }}
+      ITCH_PROJECT: ${{ secrets.ITCH_PROJECT }}
+      APPCENTER_OWNER_NAME: ${{ secrets.APPCENTER_OWNER_NAME }}
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
+      STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
+      STEAM_APP_ID: ${{ secrets.STEAM_APP_ID }}
+      STEAM_DEPOT_VDF_PATH: ${{ secrets.STEAM_DEPOT_VDF_PATH }}
+      APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+      APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+      APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+      CUSTOM_SERVER_HOST: ${{ secrets.CUSTOM_SERVER_HOST }}
+      CUSTOM_SERVER_USER: ${{ secrets.CUSTOM_SERVER_USER }}
+      CUSTOM_SERVER_KEY: ${{ secrets.CUSTOM_SERVER_KEY }}
 
   test_deploy_from_release:
     name: 🌍 Test Deploy From Release
@@ -148,4 +167,23 @@ jobs:
       buildTargets: '[]'
       hasCombinedArtifacts: ${{ needs.validate_release.outputs.hasCombinedArtifacts }}
       artifactSource: release
-    secrets: inherit
+    secrets:
+      CICD_PAT: ${{ secrets.CICD_PAT }}
+      DEPLOY_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
+      ITCH_USERNAME: ${{ secrets.ITCH_USERNAME }}
+      ITCH_PROJECT: ${{ secrets.ITCH_PROJECT }}
+      APPCENTER_OWNER_NAME: ${{ secrets.APPCENTER_OWNER_NAME }}
+      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+      STEAM_USERNAME: ${{ secrets.STEAM_USERNAME }}
+      STEAM_PASSWORD: ${{ secrets.STEAM_PASSWORD }}
+      STEAM_APP_ID: ${{ secrets.STEAM_APP_ID }}
+      STEAM_DEPOT_VDF_PATH: ${{ secrets.STEAM_DEPOT_VDF_PATH }}
+      APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+      APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+      APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+      CUSTOM_SERVER_HOST: ${{ secrets.CUSTOM_SERVER_HOST }}
+      CUSTOM_SERVER_USER: ${{ secrets.CUSTOM_SERVER_USER }}
+      CUSTOM_SERVER_KEY: ${{ secrets.CUSTOM_SERVER_KEY }}
