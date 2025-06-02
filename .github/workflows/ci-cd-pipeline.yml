@@ -144,7 +144,8 @@ jobs:
       buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.unpack_inputs.outputs.requiresCombined }}
       skipPerBuildTargetArtifacts: ${{ needs.unpack_inputs.outputs.skipPerBuildTarget }}
-    secrets: inherit
+    secrets:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # ─────────────────────────────────────────────────────────────────────────────
   # 4. Deploy
