@@ -64,4 +64,7 @@ jobs:
       projectName: ${{ needs.prepare_metadata.outputs.projectName }}
       buildTargets: ${{ inputs.buildTargets }}
       combineArtifacts: ${{ needs.prepare_metadata.outputs.requiresCombined }}
-    secrets: inherit
+    secrets:
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
