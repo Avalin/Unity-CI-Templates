@@ -34,6 +34,11 @@ on:
         required: false
         type: string
         default: "None (tests were not run)"
+    secrets:
+      SLACK_WEBHOOK:
+        required: false
+      DISCORD_WEBHOOK:
+        required: false
 
 jobs:
   notify:
@@ -65,7 +70,7 @@ jobs:
 
       # ───── Slack ─────
       - name: 📢 Send Slack Notification (if configured)
-        if: ${{ env.SLACK_WEBHOOK != '' }}
+        if: ${{ secrets.SLACK_WEBHOOK != '' }}
         continue-on-error: true
         run: |
           case "${{ steps.generate_notification.outputs.status }}" in
@@ -73,10 +78,9 @@ jobs:
             failure) COLOR="danger" ;;
             *) COLOR="#cccccc" ;;
           esac
-      
-          # Interpret literal newlines correctly
+
           TEXT=$'*${{ steps.generate_notification.outputs.title }}* - `${{ github.repository }}`\n${{ steps.generate_notification.outputs.slackMessage }}'
-      
+
           PAYLOAD=$(jq -n \
             --arg text "$TEXT" \
             --arg color "$COLOR" \
@@ -85,34 +89,33 @@ jobs:
               attachments: [{ color: $color }]
             }'
           )
-      
+
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" \
             -d "$PAYLOAD" "$SLACK_WEBHOOK")
-      
+
           if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
             echo "SLACK_STATUS=✅ Notification sent" >> $GITHUB_ENV
           else
             echo "SLACK_STATUS=❌ Failed to send (HTTP $RESPONSE)" >> $GITHUB_ENV
           fi
         env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}    
-    
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
       # ───── Discord ─────
       - name: 📢 Send Discord Notification (if configured)
-        if: ${{ env.DISCORD_WEBHOOK != '' }}
+        if: ${{ secrets.DISCORD_WEBHOOK != '' }}
         continue-on-error: true
         run: |
-          # Interpret literal newlines correctly
           TEXT=$'${{ steps.generate_notification.outputs.discordMessage }}'
-      
+
           PAYLOAD=$(jq -n \
             --arg content "$TEXT" \
             '{ content: $content }'
           )
-      
+
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Content-Type: application/json" \
             -d "$PAYLOAD" "$DISCORD_WEBHOOK")
-      
+
           if [ "$RESPONSE" -ge 200 ] && [ "$RESPONSE" -lt 300 ]; then
             echo "DISCORD_STATUS=✅ Notification sent" >> $GITHUB_ENV
           else
