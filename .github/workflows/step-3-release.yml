@@ -29,8 +29,6 @@ on:
         type: string
         default: "false"
         required: false
-    secrets:
-      GITHUB_TOKEN: { required: true }
     outputs:
       releaseErrorMessage:
         description: "Error message if release failed"
