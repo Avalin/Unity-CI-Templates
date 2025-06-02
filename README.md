@@ -1,3 +1,7 @@
+<!--
+Search keywords: Unity CI/CD, Unity GitHub Actions, Unity automation pipeline, Unity build system, Unity deploy GitHub, Unity test automation, Unity game dev CI.
+-->
+
 # 🚀 Unity CI/CD Pipeline
 
 **Robust GitHub Actions workflows for Unity projects. Automates testing, multi-platform builds, and GitHub Releases with modular, reusable design.**
