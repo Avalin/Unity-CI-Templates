@@ -170,6 +170,7 @@ jobs:
       artifactSource: build
     secrets:
       CICD_PAT: ${{ secrets.CICD_PAT }}
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
       DEPLOY_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
       ITCH_USERNAME: ${{ secrets.ITCH_USERNAME }}
       ITCH_PROJECT: ${{ secrets.ITCH_PROJECT }}
