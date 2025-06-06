@@ -51,6 +51,7 @@ jobs:
     steps:
       - name: 🧮 Create Build Matrix from Grouped Build Targets
         id: set_matrix
+        shell: bash
         run: |
           grouped='${{ needs.group_build_targets.outputs.validBuildTargets }}'
           echo "📦 Grouped build targets: $grouped"
@@ -102,7 +103,7 @@ jobs:
           buildType: ${{ inputs.buildType }}
           unityVersion: ${{ inputs.unityVersion }}
 
-      - name: Resolve Unity Run Params
+      - name: Resolve Unity Run Parameters
         id: resolve_run_parameters
         uses: avalin/unity-ci-templates/.github/actions/resolve-unity-run-parameters@main
         with:
@@ -133,9 +134,11 @@ jobs:
 
       - name: Fix Permissions (Linux only)
         if: startsWith(matrix.os, 'ubuntu')
+        shell: bash
         run: sudo chown -R $USER:$USER build/
 
       - name: Organize Build Output
+        shell: bash
         run: |
           VERSION="${{ inputs.buildVersion }}"
           PLATFORM="${{ steps.resolve_run_parameters.outputs.targetPlatform }}"
@@ -186,6 +189,7 @@ jobs:
     if: ${{ needs.summarize_builds.outputs.didAnyBuildsFail == 'true' }}
     steps:
       - name: ⛔ Fail the Pipeline
+        shell: bash
         run: |
           echo "❌ One or more builds failed. Failing the pipeline."
           exit 1

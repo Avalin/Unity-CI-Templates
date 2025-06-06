@@ -35,6 +35,7 @@ on:
         type: string
     secrets:
       CICD_PAT: { required: true }
+      BUTLER_API_KEY: { required: false }
       DEPLOY_API_KEY: { required: false }
       ITCH_USERNAME: { required: false }
       ITCH_PROJECT: { required: false }
@@ -140,6 +141,10 @@ jobs:
           publish_dir: "./${{ env.ARTIFACT_DIR }}/WebGL"
 
       # ───── itch.io ─────
+      - name: 🤵 Install Butler
+        if: matrix.target == 'itch.io'
+        uses: remarkablegames/setup-butler@v1
+
       - name: 🕹️ Deploy to itch.io
         if: matrix.target == 'itch.io'
         run: |
@@ -149,7 +154,7 @@ jobs:
           fi
           butler push "$ARTIFACT_DIR" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
         env:
-          BUTLER_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
 
       # ───── App Center ─────
       - name: 📱 Deploy to App Center

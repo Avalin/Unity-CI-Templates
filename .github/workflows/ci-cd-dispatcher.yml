@@ -131,7 +131,6 @@ jobs:
     with:
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       buildVersion: ${{ needs.prepare_metadata.outputs.buildVersion }}
-    secrets: inherit
   
   trigger_ci:
     name: Trigger CI/CD Pipeline

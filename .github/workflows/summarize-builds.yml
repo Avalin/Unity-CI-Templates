@@ -61,6 +61,18 @@ jobs:
             gh run download --name "$name" --dir "all-artifacts/${name}" || echo "⚠️ Failed to download $name"
           done
 
+      - name: 📦 Unzip Downloaded Artifacts
+        run: |
+          echo "🔍 Unzipping all .zip artifacts..."
+          find all-artifacts -name "*.zip" -exec sh -c '
+            for zip; do
+              dir="${zip%*.zip}"
+              mkdir -p "$dir"
+              unzip -q "$zip" -d "$dir"
+              rm "$zip"
+            done
+          ' sh {} +
+
       - name: 📜 Write Build Summary
         id: summary
         run: |
@@ -74,6 +86,8 @@ jobs:
           PROJECT='${{ inputs.projectName }}'
           COMBINED='${{ inputs.combineRequested }}'
           ALL_BUILD_TARGETS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')
+
+          build_failed=0
 
           for buildTarget in $ALL_BUILD_TARGETS; do
             label="$buildTarget"
@@ -97,6 +111,7 @@ jobs:
               echo "| $label | ✅ Build successful |" >> $GITHUB_STEP_SUMMARY
             else
               echo "| $label | ❌ Build failed |" >> $GITHUB_STEP_SUMMARY
+              build_failed=1
             fi
           done
 
@@ -109,6 +124,7 @@ jobs:
               echo "- ✅ Combined artifact successfully created and uploaded." >> $GITHUB_STEP_SUMMARY
             else
               echo "- ❌ Combined artifact expected but failed to create/upload." >> $GITHUB_STEP_SUMMARY
+              build_failed=1
             fi
           else
             echo "- ℹ️ Combined artifact was not requested." >> $GITHUB_STEP_SUMMARY
