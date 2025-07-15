@@ -3,6 +3,10 @@ name: 🏷️ Version Tagger
 on:
   workflow_dispatch:
     inputs:
+      runnerMain:
+        type: string
+        required: true
+        default: 'ubuntu-latest'
       buildType:
         description: "Build type: preview | release_candidate | release"
         type: string
@@ -13,6 +17,9 @@ on:
         required: true
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
       buildVersion:
         type: string
         required: true
@@ -24,7 +31,7 @@ jobs:
   tag_resolver:
     name: 🏷️ Resolve & Create Tag
     if: ${{ inputs.buildType != 'preview' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     outputs:
       buildVersion: ${{ steps.set_version.outputs.version }}
       tag_existed: ${{ steps.tag_exists.outputs.exists }}
@@ -54,7 +61,7 @@ jobs:
 
   summarize_tagging:
     name: 📄 Summarize Tagging Info
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     needs: tag_resolver
     if: always()
     steps:

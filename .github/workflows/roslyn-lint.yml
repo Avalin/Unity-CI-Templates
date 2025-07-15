@@ -3,6 +3,9 @@ name: 📈 Roslyn Lint (CSharpier)
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
       allowAutofix:
         description: "Whether to allow auto-formatting and commit"
         required: false
@@ -17,7 +20,7 @@ on:
 jobs:
   roslyn-lint:
     name: Lint C# Code
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     steps:
       - name: Checkout project
         uses: actions/checkout@v4

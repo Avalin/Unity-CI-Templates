@@ -3,6 +3,12 @@ name: 🧩 Step 2 - Build
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
+      runnerMacos:
+        type: string
+        required: true
       projectName:
         type: string
         required: false
@@ -40,11 +46,13 @@ jobs:
   group_build_targets:
     uses: ./.github/workflows/group-build-targets-by-os.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       buildTargets: ${{ inputs.buildTargets }}
 
   generate_matrix:
     name: 🧮 Generate Build Matrix
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     needs: group_build_targets
     outputs:
       matrix: ${{ steps.set_matrix.outputs.matrix }}
@@ -167,6 +175,7 @@ jobs:
     needs: [ build_targets ]
     uses: ./.github/workflows/combine-builds.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
       projectName: ${{ inputs.projectName }}
       buildVersion: ${{ inputs.buildVersion }}
       retentionDays: ${{ inputs.retentionDays }}
@@ -176,6 +185,7 @@ jobs:
     if: always()
     uses: ./.github/workflows/summarize-builds.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
       projectName: ${{ inputs.projectName }}
       buildVersion: ${{ inputs.buildVersion }}
       groupedBuildTargets: ${{ needs.group_build_targets.outputs.validBuildTargets }}
@@ -185,7 +195,7 @@ jobs:
   fail_if_builds_failed:
     name: ⛔ Fail if Any Builds Failed
     needs: [summarize_builds]
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     if: ${{ needs.summarize_builds.outputs.didAnyBuildsFail == 'true' }}
     steps:
       - name: ⛔ Fail the Pipeline

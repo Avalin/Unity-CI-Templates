@@ -3,6 +3,9 @@ name: 📊 Unity Tests Runner
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        required: true
+        type: string
       testMode:
         description: "Unity test mode to run (EditMode or PlayMode)"
         required: true
@@ -44,7 +47,7 @@ on:
 jobs:
   run-tests:
     name: Run ${{ inputs.testMode }} Tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     outputs:
       total: ${{ steps.summary.outputs.total }}
       passed: ${{ steps.summary.outputs.passed }}

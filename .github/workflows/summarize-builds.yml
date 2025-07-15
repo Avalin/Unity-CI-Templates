@@ -7,6 +7,9 @@ description: |
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
       projectName:
         required: true
         type: string
@@ -31,7 +34,7 @@ on:
 jobs:
   summarize:
     name: 📄 Summarize Build Results
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     outputs:
       didAnyBuildsFail: ${{ steps.summary.outputs.didAnyBuildsFail }}
     steps:
@@ -85,11 +88,11 @@ jobs:
           VERSION='${{ inputs.buildVersion }}'
           PROJECT='${{ inputs.projectName }}'
           COMBINED='${{ inputs.combineRequested }}'
-          ALL_BUILD_TARGETS=$(echo "$GROUPED" | jq -r 'to_entries[].value[]')
+          readarray -t ALL_BUILD_TARGETS < <(echo "$GROUPED" | jq -r 'to_entries[].value[]')
 
           build_failed=0
 
-          for buildTarget in $ALL_BUILD_TARGETS; do
+          for buildTarget in "${ALL_BUILD_TARGETS[@]}"; do
             label="$buildTarget"
 
             if [[ "$COMBINED" == "true" ]]; then
@@ -99,7 +102,7 @@ jobs:
               elif [ -d "all-artifacts/${buildTarget}" ]; then
                 artifact_dir="all-artifacts/${buildTarget}"
               else
-                artifact_dir=""
+                artifact_dir="UNKNOWN_PATH"
               fi
             else
               artifact_dir="all-artifacts/${PROJECT}-${VERSION}-${buildTarget}"

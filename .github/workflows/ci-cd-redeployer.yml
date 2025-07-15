@@ -3,6 +3,14 @@ name: ✈️ CI/CD Redeployer
 on:
   workflow_dispatch:
     inputs:
+      runnerMain:
+        type: string
+        required: true
+        default: 'ubuntu-latest'
+      runnerMacos:
+        type: string
+        required: true
+        default: 'macos-latest'
       buildVersion:
         description: "The release tag version to deploy from (e.g., v1.2.3)"
         required: true
@@ -27,7 +35,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   sanitize_project_name:
     name: Sanitize Project Name
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     outputs:
       sanitized_name: ${{ steps.sanitize.outputs.sanitized_name }}
     steps:
@@ -42,7 +50,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   validate_release:
     name: Validate Release Tag and Artifacts
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     outputs:
       hasCombinedArtifacts: ${{ steps.check.outputs.hasCombinedArtifacts }}
     steps:
@@ -88,6 +96,8 @@ jobs:
     uses: ./.github/workflows/step-4-deploy.yml
     with:
       buildType: release
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       buildVersion: ${{ inputs.buildVersion }}
       projectName: ${{ needs.sanitize_project_name.outputs.sanitized_name }}
       deployTargets: ${{ inputs.deployTargets || '[]' }}
@@ -105,6 +115,7 @@ jobs:
       - redeploy
     uses: ./.github/workflows/step-5-notify.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
       buildVersion: ${{ inputs.buildVersion }}
       releaseResult: 'success'
       releaseErrorMessage: ''

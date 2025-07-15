@@ -3,6 +3,12 @@ name: 🌍 Step 4 - Deploy
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
+      runnerMacos:
+        type: string
+        required: true
       buildType:
         type: string
         required: true
@@ -59,6 +65,8 @@ jobs:
   resolve_deploy_matrix:
     uses: ./.github/workflows/resolve-deploy-matrix.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       validTargets: ${{ inputs.deployTargets }}
 
   deploy:
@@ -301,6 +309,7 @@ jobs:
     uses: ./.github/workflows/summarize-deploys.yml
     needs: deploy
     with:
+      runnerMain: ${{ inputs.runnerMain }}
       projectName: ${{ inputs.projectName }}
       buildVersion: ${{ inputs.buildVersion }}
       buildType: ${{ inputs.buildType }}

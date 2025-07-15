@@ -91,6 +91,7 @@ jobs:
     needs: [ dry_build_targets ]
     uses: ./.github/workflows/combine-builds.yml
     with:
+      runnerMain: "ubuntu-latest"
       projectName: ${{ inputs.projectName }}
       buildVersion: ${{ inputs.buildVersion }}
       retentionDays: ${{ inputs.retentionDays }}

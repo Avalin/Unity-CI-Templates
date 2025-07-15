@@ -3,6 +3,12 @@ name: 🧮 Resolve Deploy Matrix
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
+      runnerMacos:
+        type: string
+        required: true
       validTargets:
         type: string
         required: true
@@ -17,7 +23,7 @@ on:
 jobs:
   resolve:
     name: Resolve Deploy Matrix
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
       requiresCombinedArtifact: ${{ steps.set.outputs.requiresCombinedArtifact }}
@@ -50,19 +56,21 @@ jobs:
           contains() { local e match="$1"; shift; for e; do [[ "$e" == "$match" ]] && return 0; done; return 1; }
 
           for TARGET in $(echo "$DEPLOY_TARGETS" | jq -r '.[]'); do
-            OS=$(jq -r --arg t "$TARGET" '.[$t].os // "ubuntu-latest"' "$CONFIG_FILE")
+            if [ "$TARGET" = "testflight" ]; then
+              OS="${{ inputs.runnerMacos }}"
+            else
+              OS="${{ inputs.runnerMain }}"
+            fi
+
             COMBINED=$(jq -r --arg t "$TARGET" '.[$t].requiresCombinedArtifact // false' "$CONFIG_FILE")
-            # pull compatible build targets as compact JSON array
             BUILD_TARGETS=$(jq -c --arg t "$TARGET" '.[$t].compatibleBuildTargets' "$CONFIG_FILE")
 
             MATRIX+='{"target":"'"$TARGET"'","os":"'"$OS"'","requiresCombinedArtifact":"'"$COMBINED"'","requiredBuildTargets":'"$BUILD_TARGETS"'},'
 
-            # Track if any target overall requires combined artifact
             if [ "$COMBINED" = "true" ]; then
               COMBINED_NEEDED=true
             fi
 
-            # Aggregate unique build targets across all targets (for the global list)
             for p in $(echo "$BUILD_TARGETS" | jq -r '.[]'); do
               if ! contains "$p" "${BUILD_TARGET_SET[@]}"; then
                 BUILD_TARGET_SET+=("$p")

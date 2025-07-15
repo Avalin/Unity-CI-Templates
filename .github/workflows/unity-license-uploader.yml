@@ -2,11 +2,15 @@ name: 📥️ Upload Unity License
 
 on:
   workflow_call:
+    inputs:
+      runnerMain:
+        required: true
+        type: string
 
 jobs:
   activate-license:
     name: Activate Unity License
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

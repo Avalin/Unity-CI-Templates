@@ -3,6 +3,9 @@ name: 📦 Step 3 - Release
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
       buildType:
         description: "Build type: 'preview' | 'release_candidate' | 'release'"
         type: string
@@ -38,7 +41,7 @@ jobs:
   publish:
     if: ${{ inputs.buildType == 'release' || inputs.buildType == 'release_candidate' }}
     name: 📤 Publish GitHub Release
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     outputs:
       releaseErrorMessage: ${{ steps.error-handler.outputs.releaseErrorMessage }}
 
