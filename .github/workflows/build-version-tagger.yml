@@ -32,6 +32,9 @@ jobs:
     name: 🏷️ Resolve & Create Tag
     if: ${{ inputs.buildType != 'preview' }}
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       buildVersion: ${{ steps.set_version.outputs.version }}
       tag_existed: ${{ steps.tag_exists.outputs.exists }}
@@ -62,6 +65,9 @@ jobs:
   summarize_tagging:
     name: 📄 Summarize Tagging Info
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     needs: tag_resolver
     if: always()
     steps:

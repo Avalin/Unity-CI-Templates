@@ -74,6 +74,9 @@ jobs:
   summarize:
     name: 📄 Summarize Metadata
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Write Summary
         run: |

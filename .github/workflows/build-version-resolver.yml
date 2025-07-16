@@ -23,6 +23,9 @@ jobs:
   version_resolver:
     name: Generate Build Version
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       buildVersion: ${{ steps.get_version.outputs.version }}
 

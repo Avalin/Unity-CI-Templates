@@ -49,6 +49,8 @@ jobs:
     name: ⏳ Prepare Metadata
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      runnerMain: "ubuntu-latest"
+      runnerMacos: "macos-latest"
       unityVersion: ${{ inputs.unityVersion }}
       projectName: ${{ vars.PROJECT_NAME }}
       skipTests: false
@@ -62,6 +64,7 @@ jobs:
     needs: prepare_metadata
     uses: ./.github/workflows/step-1-test.yml
     with:
+      runnerMain: "ubuntu-latest"
       unityVersion: ${{ needs.prepare_metadata.outputs.unityVersion }}
       useGitLfs: ${{ inputs.useGitLFS }}
       editModePath: ${{ inputs.editModePath != '' && inputs.editModePath || needs.prepare_metadata.outputs.editModePath }}

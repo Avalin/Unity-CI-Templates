@@ -53,6 +53,9 @@ jobs:
   generate_matrix:
     name: 🧮 Generate Build Matrix
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     needs: group_build_targets
     outputs:
       matrix: ${{ steps.set_matrix.outputs.matrix }}
@@ -76,6 +79,9 @@ jobs:
   build_targets:
     name: Build for ${{ matrix.buildTarget }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: ${{ inputs.timeoutMinutes }}
     needs: generate_matrix
     strategy:
@@ -196,6 +202,9 @@ jobs:
     name: ⛔ Fail if Any Builds Failed
     needs: [summarize_builds]
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     if: ${{ needs.summarize_builds.outputs.didAnyBuildsFail == 'true' }}
     steps:
       - name: ⛔ Fail the Pipeline

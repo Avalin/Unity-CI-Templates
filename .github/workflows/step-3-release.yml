@@ -42,6 +42,9 @@ jobs:
     if: ${{ inputs.buildType == 'release' || inputs.buildType == 'release_candidate' }}
     name: 📤 Publish GitHub Release
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       releaseErrorMessage: ${{ steps.error-handler.outputs.releaseErrorMessage }}
 

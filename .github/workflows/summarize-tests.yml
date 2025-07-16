@@ -59,6 +59,9 @@ jobs:
   summarize:
     name: 📄 Summarize Tests Results
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       has_fails: ${{ steps.collect.outputs.has_fails }}
       total_tests: ${{ steps.collect.outputs.total_tests }}

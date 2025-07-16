@@ -3,6 +3,12 @@ name: 🌀 Dry Build
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: false
+      runnerMacos:
+        type: string
+        required: false
       projectName:
         type: string
         required: false
@@ -34,11 +40,13 @@ jobs:
     name: 🧮 Group Build Targets
     uses: ./.github/workflows/group-build-targets-by-os.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       buildTargets: ${{ inputs.buildTargets }}
 
   generate_matrix:
     name: 🧮 Generate Dry Build Matrix
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     needs: [ group_build_targets ]
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -101,6 +109,7 @@ jobs:
     if: always()
     uses: ./.github/workflows/summarize-builds.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
       projectName: ${{ inputs.projectName }}
       buildVersion: ${{ inputs.buildVersion }}
       groupedBuildTargets: ${{ needs.group_build_targets.outputs.validBuildTargets }}

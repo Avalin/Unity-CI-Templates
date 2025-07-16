@@ -44,6 +44,8 @@ jobs:
     name: ⏳ Prepare Metadata
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      runnerMain: "ubuntu-latest"
+      runnerMacos: "macos-latest"
       projectName: ${{ inputs.projectName }}
       unityVersion: ${{ inputs.unityVersion }}
       skipTests: true
@@ -58,6 +60,8 @@ jobs:
     needs: prepare_metadata
     uses: ./.github/workflows/step-2-build.yml
     with:
+      runnerMain: "ubuntu-latest"
+      runnerMacos: "macos-latest"
       unityVersion: ${{ needs.prepare_metadata.outputs.unityVersion }}
       buildVersion: ${{ needs.prepare_metadata.outputs.buildVersion }}
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}

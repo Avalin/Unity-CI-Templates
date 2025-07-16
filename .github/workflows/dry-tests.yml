@@ -3,6 +3,9 @@ name: 🌀 Dry Tests
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: false
       editmodeFailedCount:
         description: "Number of simulated failed EditMode tests"
         required: true
@@ -45,7 +48,10 @@ on:
 jobs:
   dry_tests:
     name: 🧪 Simulate Tests Summary
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       hasFails: ${{ steps.simulate.outputs.hasFails }}
       totalTests: ${{ steps.simulate.outputs.totalTests }}

@@ -34,6 +34,9 @@ jobs:
   unpack_inputs:
     name: Unpack Inputs
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       projectName: ${{ steps.unpack.outputs.projectName }}
       skipTests: ${{ steps.unpack.outputs.skipTests }}

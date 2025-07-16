@@ -3,6 +3,9 @@ name: 🌀 Dry Deploy
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: false
       deployTargets:
         description: "JSON array of deploy targets (e.g. [\"itch.io\", \"s3\"])"
         required: true
@@ -21,7 +24,10 @@ on:
 jobs:
   dry_deploy:
     name: 🛠 Simulate Deployments
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       deployResult: ${{ steps.simulate.outputs.deployResult }}
     steps:

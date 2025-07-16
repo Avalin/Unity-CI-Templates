@@ -101,6 +101,7 @@ jobs:
     uses: ./.github/workflows/prepare-metadata.yml
     with:
       runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       unityVersion: ${{ vars.UNITY_VERSION }}
       projectName: ${{ inputs.projectName }}
       skipTests: true

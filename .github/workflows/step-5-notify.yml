@@ -45,6 +45,9 @@ jobs:
   notify:
     if: startsWith(inputs.buildVersion, 'v') && !contains(inputs.buildVersion, '-preview')
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     env:
       SLACK_STATUS: "⚠️ Webhook not configured"
       DISCORD_STATUS: "⚠️ Webhook not configured"

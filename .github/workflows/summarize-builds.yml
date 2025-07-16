@@ -35,6 +35,9 @@ jobs:
   summarize:
     name: 📄 Summarize Build Results
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       didAnyBuildsFail: ${{ steps.summary.outputs.didAnyBuildsFail }}
     steps:

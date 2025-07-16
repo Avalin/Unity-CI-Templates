@@ -139,6 +139,9 @@ jobs:
     name: 🛑 Stop Pipeline on Failed Tests
     needs: summarize_tests
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     if: ${{ needs.summarize_tests.outputs.hasFails == 'true' }}
     steps:
       - name: Force Fail Workflow

@@ -23,6 +23,9 @@ jobs:
   summarize:
     name: 📄 Summarize Deployment Results
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: 👅 Download All Deployment Result Files
         uses: actions/download-artifact@v4

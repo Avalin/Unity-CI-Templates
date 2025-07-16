@@ -73,6 +73,9 @@ jobs:
     name: 🚀 Deploy ${{ matrix.target }} on ${{ matrix.os }}
     needs: resolve_deploy_matrix
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:

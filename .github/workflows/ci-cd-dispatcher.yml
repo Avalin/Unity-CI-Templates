@@ -80,6 +80,9 @@ jobs:
     needs: 
       - resolve_runners
     runs-on: ${{ needs.resolve_runners.outputs.main }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
     steps:
@@ -164,6 +167,9 @@ jobs:
       - prepare_metadata
     if: ${{ needs.validation.outputs.should_run == 'true'}}
     runs-on: ${{ needs.resolve_runners.outputs.main }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout Workflows Only
         uses: actions/checkout@v4

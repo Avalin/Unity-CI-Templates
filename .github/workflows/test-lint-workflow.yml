@@ -29,5 +29,6 @@ jobs:
     name: Analyze with Roslynator
     uses: ./.github/workflows/roslyn-lint.yml
     with:
+      runnerMain: "ubuntu-latest"
       allowAutofix: ${{ inputs.allowAutofix == 'true' }}
       allowFailure: ${{ inputs.allowFailure == 'true' }}

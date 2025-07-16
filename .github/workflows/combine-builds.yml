@@ -29,6 +29,9 @@ jobs:
   combine:
     name: 📆 Combine All Build Targets Into One Folder
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       created: ${{ steps.set-created.outputs.success }}
     steps:

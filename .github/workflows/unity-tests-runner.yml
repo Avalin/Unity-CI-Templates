@@ -48,6 +48,9 @@ jobs:
   run-tests:
     name: Run ${{ inputs.testMode }} Tests
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       total: ${{ steps.summary.outputs.total }}
       passed: ${{ steps.summary.outputs.passed }}

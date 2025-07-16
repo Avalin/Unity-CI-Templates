@@ -21,6 +21,9 @@ jobs:
   roslyn-lint:
     name: Lint C# Code
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout project
         uses: actions/checkout@v4

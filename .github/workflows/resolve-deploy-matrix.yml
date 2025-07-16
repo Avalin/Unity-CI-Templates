@@ -24,6 +24,9 @@ jobs:
   resolve:
     name: Resolve Deploy Matrix
     runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
       requiresCombinedArtifact: ${{ steps.set.outputs.requiresCombinedArtifact }}
