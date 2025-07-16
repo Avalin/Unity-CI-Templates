@@ -172,7 +172,19 @@ jobs:
           fetch-depth: 1
 
       - name: Install GitHub CLI
-        run: sudo apt-get install gh -y
+        shell: bash
+        run: |
+          if command -v gh &> /dev/null; then
+            echo "GitHub CLI already installed."
+          elif [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo apt-get update
+            sudo apt-get install gh -y
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install gh
+          else
+            echo "Please ensure GitHub CLI is installed on your Windows runner." >&2
+            exit 1
+          fi
 
       - name: Call CI/CD Pipeline from GitHub CLI
         env:
