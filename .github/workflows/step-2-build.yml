@@ -111,7 +111,7 @@ jobs:
 
       - name: Resolve Build Profile
         id: resolve_build_profile
-        uses: RedGlow/unity-ci-templates/.github/actions/resolve-build-profile@itch.io-integration
+        uses: avalin/unity-ci-templates/.github/actions/resolve-build-profile@main
         with:
           buildTarget: ${{ matrix.buildTarget }}
           buildType: ${{ inputs.buildType }}
@@ -119,7 +119,7 @@ jobs:
 
       - name: Resolve Unity Run Parameters
         id: resolve_run_parameters
-        uses: RedGlow/unity-ci-templates/.github/actions/resolve-unity-run-parameters@itch.io-integration
+        uses: avalin/unity-ci-templates/.github/actions/resolve-unity-run-parameters@main
         with:
           buildTarget: ${{ matrix.buildTarget }}
 

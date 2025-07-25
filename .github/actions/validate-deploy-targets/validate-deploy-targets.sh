@@ -5,7 +5,7 @@ RAW_INPUT="$1"
 BUILD_TYPE="$2"
 BUILD_TARGETS_RAW="$3"
 CONFIG_FILE=".github/config/deploy-targets.json"
-FALLBACK_URL="https://raw.githubusercontent.com/RedGlow/unity-ci-templates/main/.github/config/deploy-targets.json"
+FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
 
 # ─────────────────────────────────────────────────────────────
 # Step 1: Validate JSON input

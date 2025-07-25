@@ -40,7 +40,7 @@ jobs:
 
       - name: Resolve Build Version
         id: get_version
-        uses: RedGlow/unity-ci-templates/.github/actions/resolve-build-version@itch.io-integration
+        uses: avalin/unity-ci-templates/.github/actions/resolve-build-version@main
         with:
           ref: "${GITHUB_REF}"
           event: "${GITHUB_EVENT_NAME}"
@@ -49,7 +49,7 @@ jobs:
 
       - name: 📝 Check if Release Version Already Exists
         id: check_release
-        uses: RedGlow/unity-ci-templates/.github/actions/check-release-exists@itch.io-integration
+        uses: avalin/unity-ci-templates/.github/actions/check-release-exists@main
         with:
           version: ${{ steps.get_version.outputs.version }}
           repo: ${{ github.repository }}

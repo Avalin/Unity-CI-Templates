@@ -41,7 +41,7 @@ jobs:
         run: |
           INPUT_JSON='${{ inputs.buildTargets }}'
           CONFIG_FILE=".github/config/build-targets.json"
-          FALLBACK_URL="https://raw.githubusercontent.com/RedGlow/unity-ci-templates/main/.github/config/build-targets.json"
+          FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/build-targets.json"
 
           echo "🔍 Validating input build targets: $INPUT_JSON"
 

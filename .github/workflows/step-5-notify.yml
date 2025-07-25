@@ -61,7 +61,7 @@ jobs:
 
       - name: Generate Notification
         id: generate_notification
-        uses: RedGlow/unity-ci-templates/.github/actions/generate-notification@itch.io-integration
+        uses: avalin/unity-ci-templates/.github/actions/generate-notification@main
         with:
           releaseResult: ${{ inputs.releaseResult }}
           releaseErrorMessage: ${{ inputs.releaseErrorMessage }}

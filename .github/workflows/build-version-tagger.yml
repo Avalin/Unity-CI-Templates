@@ -42,7 +42,7 @@ jobs:
     steps:
       - name: Check if Tag Exists
         id: tag_exists
-        uses: RedGlow/unity-ci-templates/.github/actions/check-tag-exists@itch.io-integration
+        uses: avalin/unity-ci-templates/.github/actions/check-tag-exists@main
         with:
           version: ${{ inputs.buildVersion }}
           repository: ${{ github.repository }}
@@ -50,7 +50,7 @@ jobs:
 
       - name: Create Tag if Missing
         if: ${{ steps.tag_exists.outputs.exists != 'true' }}
-        uses: RedGlow/unity-ci-templates/.github/actions/create-tag@itch.io-integration
+        uses: avalin/unity-ci-templates/.github/actions/create-tag@main
         id: create
         with:
           sha: ${{ github.sha }}

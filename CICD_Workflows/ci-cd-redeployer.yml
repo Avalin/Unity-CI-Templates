@@ -41,7 +41,7 @@ jobs:
     steps:
       - name: Run Project Name Sanitizer
         id: sanitize
-        uses: RedGlow/unity-ci-templates/.github/actions/resolve-project-name@itch.io-integration
+        uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@main
         with:
           projectNameInput: ${{ vars.PROJECT_NAME }}
 
@@ -108,7 +108,7 @@ jobs:
     needs: 
       - sanitize_project_name
       - validate_release
-    uses: RedGlow/unity-ci-templates/.github/workflows/step-4-deploy.yml@itch.io-integration
+    uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@main
     with:
       buildType: release
       runnerMain: ${{ inputs.runnerMain }}
@@ -128,7 +128,7 @@ jobs:
     name: Notify
     needs: 
       - redeploy
-    uses: RedGlow/unity-ci-templates/.github/workflows/step-5-notify.yml@itch.io-integration
+    uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@main
     with:
       runnerMain: ${{ inputs.runnerMain }}
       buildVersion: ${{ inputs.buildVersion }}
