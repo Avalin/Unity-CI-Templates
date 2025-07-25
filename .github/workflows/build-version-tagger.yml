@@ -42,7 +42,7 @@ jobs:
     steps:
       - name: Check if Tag Exists
         id: tag_exists
-        uses: avalin/unity-ci-templates/.github/actions/check-tag-exists@main
+        uses: avalin/unity-ci-templates/.github/actions/check-tag-exists@v1
         with:
           version: ${{ inputs.buildVersion }}
           repository: ${{ github.repository }}
@@ -50,7 +50,7 @@ jobs:
 
       - name: Create Tag if Missing
         if: ${{ steps.tag_exists.outputs.exists != 'true' }}
-        uses: avalin/unity-ci-templates/.github/actions/create-tag@main
+        uses: avalin/unity-ci-templates/.github/actions/create-tag@v1
         id: create
         with:
           sha: ${{ github.sha }}
