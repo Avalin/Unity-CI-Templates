@@ -174,11 +174,12 @@ jobs:
                 TARGET_CHANNEL="windows"
                 ;;
             esac
-            butler push "$ARTIFACT_DIR/$PROJECT_DIR"-"$t" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:$TARGET_CHANNEL"
+            butler push "$ARTIFACT_DIR/$PROJECT_DIR"-"$t" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:$TARGET_CHANNEL" --userversion "$VERSION"
           done
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
           REQUIRED_BUILD_TARGETS: '${{ toJson(matrix.requiredBuildTargets) }}'
+          VERSION: ${{ inputs.buildVersion }}
 
       # ───── App Center ─────
       - name: 📱 Deploy to App Center
