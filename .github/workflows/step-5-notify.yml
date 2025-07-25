@@ -61,7 +61,7 @@ jobs:
 
       - name: Generate Notification
         id: generate_notification
-        uses: avalin/unity-ci-templates/.github/actions/generate-notification@v1
+        uses: RedGlow/unity-ci-templates/.github/actions/generate-notification@v1
         with:
           releaseResult: ${{ inputs.releaseResult }}
           releaseErrorMessage: ${{ inputs.releaseErrorMessage }}

@@ -86,7 +86,7 @@ jobs:
       ARTIFACT_DIR: deployment-artifacts/${{ inputs.projectName }}-${{ inputs.buildVersion }}
     steps:
       - name: 📥 Retrieve Artifacts from Release
-        uses: avalin/unity-ci-templates/.github/actions/download-from-release@main
+        uses: RedGlow/unity-ci-templates/.github/actions/download-from-release@main
         with:
           projectName: ${{ inputs.projectName }}
           version: ${{ inputs.buildVersion }}
@@ -105,7 +105,7 @@ jobs:
 
       - name: 📥 Retrieve Artifacts from Build (Per-Build-Target)
         if: ${{ inputs.artifactSource == 'build' && inputs.hasCombinedArtifacts == 'false' }}
-        uses: avalin/unity-ci-templates/.github/actions/download-per-build-target-artifacts-from-build@main
+        uses: RedGlow/unity-ci-templates/.github/actions/download-per-build-target-artifacts-from-build@main
         with:
           artifactDir: ${{ env.ARTIFACT_DIR }}
           projectName: ${{ inputs.projectName }}
@@ -116,7 +116,7 @@ jobs:
 
       - name: 🛠️ Normalize Artifact Layout (Release Per-Build-Target Only)
         if: ${{ inputs.artifactSource == 'release' && inputs.hasCombinedArtifacts == 'false' }}
-        uses: avalin/unity-ci-templates/.github/actions/normalize-artifact-layout@main
+        uses: RedGlow/unity-ci-templates/.github/actions/normalize-artifact-layout@main
         with:
           artifactDir: ${{ env.ARTIFACT_DIR }}
 
@@ -134,13 +134,13 @@ jobs:
 
       - name: 🔎 Detect WebGL Compression Format
         id: detect-compression
-        uses: avalin/unity-ci-templates/.github/actions/detect-webgl-compression@main
+        uses: RedGlow/unity-ci-templates/.github/actions/detect-webgl-compression@main
         with:
           artifactDir: ${{ env.ARTIFACT_DIR }}
 
       - name: 🩹 Patch & Decompress Unity WebGL for GitHub Pages
         if: ${{ matrix.target == 'gh-pages' && steps.detect-compression.outputs.needs_patch == 'true' }}
-        uses: avalin/unity-ci-templates/.github/actions/patch-webgl-for-gh-pages@main
+        uses: RedGlow/unity-ci-templates/.github/actions/patch-webgl-for-gh-pages@main
         with:
           artifactDir: ${{ env.ARTIFACT_DIR }}
 

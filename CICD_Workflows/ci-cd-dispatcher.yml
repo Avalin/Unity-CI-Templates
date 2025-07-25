@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Resolve runners
         id: resolve
-        uses: avalin/unity-ci-templates/.github/actions/resolve-runners@main
+        uses: RedGlow/unity-ci-templates/.github/actions/resolve-runners@main
         with:
           main: ${{ vars.MAIN_RUNNER }}
           macos: ${{ vars.MACOS_RUNNER }}
@@ -130,7 +130,7 @@ jobs:
       - resolve_runners
       - validation
     if: ${{ needs.validation.outputs.should_run == 'true'}}
-    uses: avalin/unity-ci-templates/.github/workflows/prepare-metadata.yml@main
+    uses: RedGlow/unity-ci-templates/.github/workflows/prepare-metadata.yml@main
     with:
       runnerMain: ${{ needs.resolve_runners.outputs.main }}
       unityVersion: ${{ vars.UNITY_VERSION }}
@@ -148,7 +148,7 @@ jobs:
       - resolve_runners
       - prepare_metadata
     if: ${{ needs.validation.outputs.should_run == 'true'}}
-    uses: avalin/unity-ci-templates/.github/workflows/build-version-tagger.yml@main
+    uses: RedGlow/unity-ci-templates/.github/workflows/build-version-tagger.yml@main
     with:
       runnerMain: ${{ needs.resolve_runners.outputs.main }}
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}

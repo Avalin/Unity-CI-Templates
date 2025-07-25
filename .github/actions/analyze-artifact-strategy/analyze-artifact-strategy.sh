@@ -4,7 +4,7 @@ set -e
 DEPLOY_TARGETS="$1"
 ARTIFACT_SOURCE="$2"
 CONFIG_FILE=".github/config/deploy-targets.json"
-FALLBACK_URL="https://raw.githubusercontent.com/avalin/unity-ci-templates/main/.github/config/deploy-targets.json"
+FALLBACK_URL="https://raw.githubusercontent.com/RedGlow/unity-ci-templates/main/.github/config/deploy-targets.json"
 
 # ────────────────────────────────────────────────
 echo "🔍 Loading deploy-targets.json..."
