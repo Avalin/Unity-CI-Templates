@@ -71,7 +71,7 @@ jobs:
       has_playmode: ${{ steps.detect.outputs.has_playmode }}
     steps:
       - id: detect
-        uses: RedGlow/unity-ci-templates/.github/actions/detect-tests-existence@main
+        uses: RedGlow/unity-ci-templates/.github/actions/detect-tests-existence@itch.io-integration
         with:
           editModePath: ${{ inputs.editModePath }}
           playModePath: ${{ inputs.playModePath }}

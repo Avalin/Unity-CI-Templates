@@ -110,21 +110,21 @@ runs:
   steps:
     - name: 📦 Resolve Project Name
       id: project_name
-      uses: RedGlow/unity-ci-templates/.github/actions/resolve-project-name@main
+      uses: RedGlow/unity-ci-templates/.github/actions/resolve-project-name@itch.io-integration
       with:
         projectNameInput: ${{ inputs.projectNameInput }}
         projectNameRepoVar: ${{ inputs.projectNameRepoVar }}
 
     - name: 📦 Resolve Unity Version
       id: unity_version
-      uses: RedGlow/unity-ci-templates/.github/actions/resolve-unity-version@main
+      uses: RedGlow/unity-ci-templates/.github/actions/resolve-unity-version@itch.io-integration
       with:
         unityVersionInput: ${{ inputs.unityVersionInput }}
         unityVersionRepoVar: ${{ inputs.unityVersionRepoVar }}
 
     - name: ⚙️ Resolve CI Options
       id: ci_options
-      uses: RedGlow/unity-ci-templates/.github/actions/resolve-ci-config@main
+      uses: RedGlow/unity-ci-templates/.github/actions/resolve-ci-config@itch.io-integration
       with:
         useGitLfsInput: ${{ inputs.useGitLfsInput }}
         useGitLfsRepoVar: ${{ inputs.useGitLfsRepoVar }}
@@ -137,7 +137,7 @@ runs:
 
     - name: 📦 Resolve Test Config
       id: test_config
-      uses: RedGlow/unity-ci-templates/.github/actions/resolve-test-config@main
+      uses: RedGlow/unity-ci-templates/.github/actions/resolve-test-config@itch.io-integration
       with:
         editModePathInput: ${{ inputs.editModePathInput }}
         editModePathRepoVar: ${{ inputs.editModePathRepoVar }}
@@ -146,13 +146,13 @@ runs:
 
     - name: 📦 Resolve Build Type
       id: build_type
-      uses: RedGlow/unity-ci-templates/.github/actions/resolve-build-type@main
+      uses: RedGlow/unity-ci-templates/.github/actions/resolve-build-type@itch.io-integration
       with:
         buildTypeOverride: ${{ inputs.buildTypeInput }}
 
     - name: 📦 Resolve Timeouts
       id: timeouts
-      uses: RedGlow/unity-ci-templates/.github/actions/resolve-timeouts@main
+      uses: RedGlow/unity-ci-templates/.github/actions/resolve-timeouts@itch.io-integration
       with:
         timeoutTestsInput: ${{ inputs.timeoutTestsInput }}
         timeoutTestsRepoVar: ${{ inputs.timeoutTestsRepoVar }}
@@ -161,7 +161,7 @@ runs:
 
     - name: 📦 Resolve Retention Days
       id: retention
-      uses: RedGlow/unity-ci-templates/.github/actions/resolve-retention-days@main
+      uses: RedGlow/unity-ci-templates/.github/actions/resolve-retention-days@itch.io-integration
       with:
         buildType: ${{ steps.build_type.outputs.buildType }}
         retentionDaysReleaseRepoVar: ${{ inputs.retentionDaysReleaseRepoVar }}
@@ -170,7 +170,7 @@ runs:
 
     - name: 📦 Resolve Build Targets
       id: build_targets
-      uses: RedGlow/unity-ci-templates/.github/actions/resolve-build-targets@main
+      uses: RedGlow/unity-ci-templates/.github/actions/resolve-build-targets@itch.io-integration
       with:
         buildType: ${{ steps.build_type.outputs.buildType }}
         buildTargetsInput: ${{ inputs.buildTargetsInput }}
@@ -178,7 +178,7 @@ runs:
 
     - name: 📦 Resolve Deploy Targets
       id: deploy_targets
-      uses: RedGlow/unity-ci-templates/.github/actions/validate-deploy-targets@main
+      uses: RedGlow/unity-ci-templates/.github/actions/validate-deploy-targets@itch.io-integration
       with:
         buildType: ${{ steps.build_type.outputs.buildType }}
         buildTargets: ${{ steps.build_targets.outputs.buildTargets }}
@@ -186,7 +186,7 @@ runs:
 
     - name: 📦 Analyze Artifact Strategy
       id: artifact_strategy
-      uses: RedGlow/unity-ci-templates/.github/actions/analyze-artifact-strategy@main
+      uses: RedGlow/unity-ci-templates/.github/actions/analyze-artifact-strategy@itch.io-integration
       with:
         deployTargets: ${{ steps.deploy_targets.outputs.deployTargets }}
         artifactSource: ${{ inputs.artifactSource }}

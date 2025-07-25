@@ -109,7 +109,7 @@ jobs:
 
       - name: ⏳ Prepare Metadata
         id: metadata
-        uses: RedGlow/unity-ci-templates/.github/actions/prepare-metadata@main
+        uses: RedGlow/unity-ci-templates/.github/actions/prepare-metadata@itch.io-integration
         with:
           artifactSource: build
           projectNameInput: ${{ inputs.projectName }}
@@ -157,13 +157,13 @@ jobs:
 
       - name: 🔍 Detect Tests-Only Mode
         id: tests_only
-        uses: RedGlow/unity-ci-templates/.github/actions/detect-tests-only@main
+        uses: RedGlow/unity-ci-templates/.github/actions/detect-tests-only@itch.io-integration
         with:
           testsOnlyInput: ${{ inputs.testsOnly }}
 
       - name: 🔍 Detect Skip Tests Flag
         id: skip_tests
-        uses: RedGlow/unity-ci-templates/.github/actions/detect-skip-tests@main
+        uses: RedGlow/unity-ci-templates/.github/actions/detect-skip-tests@itch.io-integration
         with:
           skipTestsInput: ${{ inputs.skipTests }}
           skipTestsRepoVar: ${{ steps.metadata.outputs.excludeUnityTests }}

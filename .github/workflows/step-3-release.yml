@@ -59,13 +59,13 @@ jobs:
 
       - name: 📝 Create GitHub Release
         id: create_release
-        uses: RedGlow/unity-ci-templates/.github/actions/create-release@main
+        uses: RedGlow/unity-ci-templates/.github/actions/create-release@itch.io-integration
         with:
           version: ${{ inputs.buildVersion }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧮 Upload Per-Platform Artifacts
-        uses: RedGlow/unity-ci-templates/.github/actions/upload-per-build-target-artifacts@main
+        uses: RedGlow/unity-ci-templates/.github/actions/upload-per-build-target-artifacts@itch.io-integration
         with:
           project: ${{ inputs.projectName }}
           version: ${{ inputs.buildVersion }}

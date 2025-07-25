@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Resolve runners
         id: resolve
-        uses: RedGlow/unity-ci-templates/.github/actions/resolve-runners@main
+        uses: RedGlow/unity-ci-templates/.github/actions/resolve-runners@itch.io-integration
         with:
           main: ${{ vars.MAIN_RUNNER }}
           macos: ${{ vars.MACOS_RUNNER }}
