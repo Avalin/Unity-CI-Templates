@@ -163,9 +163,22 @@ jobs:
             echo "⚠️ Missing itch.io credentials."; 
             exit 1;
           fi
-          butler push "$ARTIFACT_DIR" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
+          TARGET_CHANNEL=""
+          for t in $(echo "$REQUIRED_BUILD_TARGETS" | jq -r '.[]'); do
+            TARGET_CHANNEL="unknown"
+            case "$t" in
+              StandaloneLinux64-Client)
+                TARGET_CHANNEL="linux"
+                ;;
+              StandaloneWindows64)
+                TARGET_CHANNEL="windows"
+                ;;
+            esac
+            butler push "$ARTIFACT_DIR/$PROJECT_DIR"-"$t" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:$TARGET_CHANNEL"
+          done
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          REQUIRED_BUILD_TARGETS: '${{ toJson(matrix.requiredBuildTargets) }}'
 
       # ───── App Center ─────
       - name: 📱 Deploy to App Center
