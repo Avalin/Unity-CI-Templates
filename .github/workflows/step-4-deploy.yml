@@ -163,9 +163,41 @@ jobs:
             echo "⚠️ Missing itch.io credentials."; 
             exit 1;
           fi
-          butler push "$ARTIFACT_DIR" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
+          TARGET_CHANNEL=""
+          for t in $(echo "$REQUIRED_BUILD_TARGETS" | jq -r '.[]'); do
+            TARGET_CHANNEL="unknown"
+            case "$t" in
+              Android)
+                TARGET_CHANNEL="android"
+                ;;
+              WebGL)
+                TARGET_CHANNEL="webgl"
+                ;;
+              StandaloneLinux64-Client)
+                TARGET_CHANNEL="linux-client"
+                ;;
+              StandaloneLinux64-Server)
+                TARGET_CHANNEL="linux-server"
+                ;;
+              StandaloneWindows)
+                TARGET_CHANNEL="windows-32"
+                ;;
+              StandaloneWindows64)
+                TARGET_CHANNEL="windows-64"
+                ;;
+              StandaloneOSX)
+                TARGET_CHANNEL="osx-desktop"
+                ;;
+              iOS)
+                TARGET_CHANNEL="osx-ios"
+                ;;
+            esac
+            butler push "$ARTIFACT_DIR/$PROJECT_DIR"-"$t" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:$TARGET_CHANNEL" --userversion "$VERSION"
+          done
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          REQUIRED_BUILD_TARGETS: '${{ toJson(matrix.requiredBuildTargets) }}'
+          VERSION: ${{ inputs.buildVersion }}
 
       # ───── App Center ─────
       - name: 📱 Deploy to App Center
