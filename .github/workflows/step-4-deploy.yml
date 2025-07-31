@@ -164,9 +164,9 @@ jobs:
             exit 1;
           fi
           TARGET_CHANNEL=""
-          for t in $(echo "$REQUIRED_BUILD_TARGETS" | jq -r '.[]'); do
+          for build_target in $(echo "$REQUIRED_BUILD_TARGETS" | jq -r '.[]'); do
             TARGET_CHANNEL="unknown"
-            case "$t" in
+            case "$build_target" in
               Android)
                 TARGET_CHANNEL="android"
                 ;;
@@ -192,7 +192,7 @@ jobs:
                 TARGET_CHANNEL="osx-ios"
                 ;;
             esac
-            butler push "$ARTIFACT_DIR/$PROJECT_DIR"-"$t" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:$TARGET_CHANNEL" --userversion "$VERSION"
+            butler push "$ARTIFACT_DIR/$PROJECT_DIR"-"$build_target" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:$TARGET_CHANNEL" --userversion "$VERSION"
           done
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
