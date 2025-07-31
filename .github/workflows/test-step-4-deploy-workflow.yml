@@ -3,6 +3,14 @@ name: 🧪 Test - Step 4 Deploy Workflow
 on:
   workflow_dispatch:
     inputs:
+      runnerMain:
+        type: string
+        required: true
+        default: 'ubuntu-latest'
+      runnerMacos:
+        type: string
+        required: true
+        default: 'macos-latest'
       buildType:
         description: "Build type: 'preview' for manual/dev builds, 'release_candidate' for staging (e.g., v1.2.3-rc.1), 'release' for production (e.g., v1.2.3)"
         required: true
@@ -48,13 +56,28 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   validate_release:
     name: Validate Release Tag and Artifacts
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     if:  ${{ inputs.artifactSource == 'release' }}
     outputs:
       hasCombinedArtifacts: ${{ steps.check.outputs.hasCombinedArtifacts }}
     steps:
       - name: Install GitHub CLI
-        run: sudo apt-get install gh -y
+        shell: bash
+        run: |
+          if command -v gh &> /dev/null; then
+            echo "GitHub CLI already installed."
+          elif [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo apt-get update
+            sudo apt-get install gh -y
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install gh
+          else
+            echo "Please ensure GitHub CLI is installed on your Windows runner." >&2
+            exit 1
+          fi
 
       - name: Check GitHub Release Exists and Artifacts
         id: check
@@ -92,6 +115,8 @@ jobs:
     if:  ${{ inputs.artifactSource == 'build' }}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       unityVersion: ${{ vars.UNITY_VERSION }}
       projectName: ${{ inputs.projectName }}
       skipTests: true
@@ -126,6 +151,8 @@ jobs:
     if:  ${{ needs.prepare_metadata.outputs.validDeployTargets != '[]' && inputs.artifactSource == 'build' }}
     uses: ./.github/workflows/step-4-deploy.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       buildType: ${{ inputs.buildType }}
       buildVersion: ${{ inputs.buildVersion }}
       projectName: ${{ needs.prepare_metadata.outputs.projectName }}
@@ -161,6 +188,8 @@ jobs:
     if:  ${{ inputs.artifactSource == 'release' }}
     uses: ./.github/workflows/step-4-deploy.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       buildType: ${{ inputs.buildType }}
       buildVersion: ${{ inputs.buildVersion }}
       projectName: ${{ vars.PROJECT_NAME }}

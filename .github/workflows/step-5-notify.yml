@@ -3,6 +3,9 @@ name: 📣 Step 5 - Notify
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
       buildVersion:
         required: true
         type: string
@@ -41,7 +44,10 @@ on:
 jobs:
   notify:
     if: startsWith(inputs.buildVersion, 'v') && !contains(inputs.buildVersion, '-preview')
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     env:
       SLACK_STATUS: "⚠️ Webhook not configured"
       DISCORD_STATUS: "⚠️ Webhook not configured"

@@ -3,6 +3,12 @@ name: ⏳ Prepare Metadata
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
+      runnerMacos:
+        type: string
+        required: true
       projectName:
         type: string
         required: true
@@ -70,7 +76,10 @@ on:
 jobs:
   prepare_metadata:
     name: ⚖️ Prepare Metadata
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       projectName: ${{ steps.metadata.outputs.projectName }}
       unityVersion: ${{ steps.metadata.outputs.unityVersion }}
@@ -167,6 +176,7 @@ jobs:
     if: needs.prepare_metadata.outputs.testsOnly == 'false' && inputs.skipBuild == 'false'
     uses: ./.github/workflows/build-version-resolver.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       buildVersion: ${{ inputs.buildVersion }}
 
@@ -178,6 +188,8 @@ jobs:
     if: always()
     uses: ./.github/workflows/summarize-metadata.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       useGitLfs: ${{ needs.prepare_metadata.outputs.useGitLfs }}
       excludeUnityTests: ${{ needs.prepare_metadata.outputs.excludeUnityTests }}
       forceCombineArtifacts: ${{ needs.prepare_metadata.outputs.forceCombineArtifacts  }}

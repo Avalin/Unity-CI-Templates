@@ -1,0 +1,38 @@
+name: 'Resolve Runners'
+description: 'Resolve MAIN and MACOS runner labels with validation and fallback logic'
+
+inputs:
+  main:
+    description: 'Custom label for main runner'
+    required: false
+    default: 'ubuntu-latest'
+  macos:
+    description: 'Custom label for macOS runner'
+    required: false
+    default: 'macos-latest'
+
+outputs:
+  main:
+    description: 'Resolved main runner label'
+    value: ${{ steps.resolve_runners.outputs.main }}
+  macos:
+    description: 'Resolved macOS runner label'
+    value: ${{ steps.resolve_runners.outputs.macos }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Make script executable
+      shell: bash
+      run: chmod +x "${{ github.action_path }}/resolve-runners.sh"
+
+    - id: resolve_runners
+      name: Run runner resolver
+      shell: bash
+      env:
+        GH_TOKEN: ${{ env.GH_TOKEN }}
+        MAIN_INPUT: ${{ inputs.main }}
+        MACOS_INPUT: ${{ inputs.macos }}
+        REPO: ${{ github.repository }}
+      run: |
+        bash "${{ github.action_path }}/resolve-runners.sh"

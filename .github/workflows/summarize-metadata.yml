@@ -6,6 +6,12 @@ description: |
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        required: true
+        type: string
+      runnerMacos:
+        required: true
+        type: string
       useGitLfs:
         required: true
         type: string
@@ -67,7 +73,10 @@ on:
 jobs:
   summarize:
     name: 📄 Summarize Metadata
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Write Summary
         run: |
@@ -83,6 +92,11 @@ jobs:
           fi
       
           echo "# ⏳ Final Metadata Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 🏃‍♀️ Pipeline Runner Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Runners                 | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------------------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Main Runner             | ${{ inputs.runnerMain }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| MacOS Runner              | ${{ inputs.runnerMacos }} |" >> $GITHUB_STEP_SUMMARY
 
           echo "## ⚙️ CI Options Summary" >> $GITHUB_STEP_SUMMARY
           echo "| Option                  | Value |" >> $GITHUB_STEP_SUMMARY

@@ -3,6 +3,14 @@ name: 🧪 Test - Prepare Metadata Workflow
 on:
   workflow_dispatch:
     inputs:
+      runnerMain:
+        required: true
+        type: string
+        default: 'ubuntu-latest'
+      runnerMacos:
+        required: true
+        type: string
+        default: 'macos-latest'
       unityVersion:
         description: "Specific unity version to test on"
         required: false
@@ -45,6 +53,8 @@ jobs:
     name: ⏳ Prepare Metadata
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       unityVersion: ${{ inputs.unityVersion }}
       projectName: ${{ inputs.projectName }}
       skipTests: ${{ inputs.skipTests }}

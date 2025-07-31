@@ -5,6 +5,9 @@ description: Summarizes the results of EditMode and PlayMode Unity test jobs int
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        required: true
+        type: string
       quietMode:
         required: true
         type: string
@@ -55,7 +58,10 @@ on:
 jobs:
   summarize:
     name: 📄 Summarize Tests Results
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       has_fails: ${{ steps.collect.outputs.has_fails }}
       total_tests: ${{ steps.collect.outputs.total_tests }}

@@ -3,6 +3,14 @@ name: ✈️ CI/CD Redeployer (Public)
 on:
   workflow_dispatch:
     inputs:
+      runnerMain:
+        type: string
+        required: true
+        default: 'ubuntu-latest'
+      runnerMacos:
+        type: string
+        required: true
+        default: 'macos-latest'
       buildVersion:
         description: "The release tag version to deploy from (e.g., v1.2.3)"
         required: true
@@ -27,7 +35,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   sanitize_project_name:
     name: Sanitize Project Name
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     outputs:
       sanitized_name: ${{ steps.sanitize.outputs.sanitized_name }}
     steps:
@@ -35,19 +43,34 @@ jobs:
         id: sanitize
         uses: avalin/unity-ci-templates/.github/actions/resolve-project-name@v1
         with:
-          projectName: ${{ vars.PROJECT_NAME }}
+          projectNameInput: ${{ vars.PROJECT_NAME }}
 
   # ─────────────────────────────────────────────────────────────────────────────
   # 1. Validate Release and Artifacts
   # ─────────────────────────────────────────────────────────────────────────────
   validate_release:
     name: Validate Release Tag and Artifacts
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       hasCombinedArtifacts: ${{ steps.check.outputs.hasCombinedArtifacts }}
     steps:
       - name: Install GitHub CLI
-        run: sudo apt-get install gh -y
+        shell: bash
+        run: |
+          if command -v gh &> /dev/null; then
+            echo "GitHub CLI already installed."
+          elif [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo apt-get update
+            sudo apt-get install gh -y
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install gh
+          else
+            echo "Please ensure GitHub CLI is installed on your Windows runner." >&2
+            exit 1
+          fi
 
       - name: Check GitHub Release Exists and Artifacts
         id: check
@@ -88,6 +111,8 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@v1
     with:
       buildType: release
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       buildVersion: ${{ inputs.buildVersion }}
       projectName: ${{ needs.sanitize_project_name.outputs.sanitized_name }}
       deployTargets: ${{ inputs.deployTargets || '[]' }}
@@ -105,6 +130,7 @@ jobs:
       - redeploy
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@v1
     with:
+      runnerMain: ${{ inputs.runnerMain }}
       buildVersion: ${{ inputs.buildVersion }}
       releaseResult: 'success'
       releaseErrorMessage: ''

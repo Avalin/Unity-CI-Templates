@@ -3,6 +3,12 @@ name: 📚 Group Build Targets By OS
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
+      runnerMacos:
+        type: string
+        required: true
       buildTargets:
         description: "JSON array of build targets to validate and group by required OS"
         required: true
@@ -15,7 +21,10 @@ on:
 jobs:
   filter_targets:
     name: 🧮 Filter Targets
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       validBuildTargets: ${{ steps.group.outputs.validBuildTargets }}
 
@@ -80,27 +89,37 @@ jobs:
       - name: 🧪 Group Valid Targets by OS
         id: group
         run: |
-          CONFIG_FILE=".github/config/build-targets.json"
           TARGETS='${{ steps.validate.outputs.validBuildTargets }}'
+          MAIN="${{ inputs.runnerMain }}"
+          MACOS="${{ inputs.runnerMacos }}"
 
-          echo "📥 Grouping targets by OS..."
+          echo "📥 Grouping targets..."
+
+          echo "$TARGETS" | jq -c 'map(
+            if . == "StandaloneOSX" or . == "iOS"
+            then { runner: "macos", target: . }
+            else { runner: "main", target: . }
+            end
+          )' > mapped.json
 
           jq -n \
-            --argjson targets "$TARGETS" \
-            --slurpfile cfg "$CONFIG_FILE" '
-              $targets
-              | map({ target: ., os: ($cfg[0][.]?.os) })
-              | group_by(.os)
-              | map({ (.[0].os): map(.target) })
+            --arg main "$MAIN" \
+            --arg macos "$MACOS" \
+            --slurpfile items mapped.json '
+              $items[0]
+              | group_by(.runner)
+              | map({
+                  (if .[0].runner == "main" then $main else $macos end): map(.target)
+                })
               | add
             ' > grouped.json
 
           echo "📦 Grouped BuildTargets:"
           cat grouped.json
 
-          echo "validBuildTargets<<EOF" >> $GITHUB_OUTPUT
-          cat grouped.json >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "validBuildTargets<<EOF" >> "$GITHUB_OUTPUT"
+          cat grouped.json >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: 📋 Summary of Build Target Validation
         if: always()

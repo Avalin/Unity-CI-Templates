@@ -3,6 +3,9 @@ name: 🌀 Dry Release
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: false
       simulateResult:
         description: "Simulate whether the release succeeds or fails"
         required: true
@@ -16,7 +19,10 @@ on:
 jobs:
   dry_release:
     name: 🧪 Simulate Release
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       releaseErrorMessage: ${{ steps.simulate.outputs.releaseErrorMessage }}
     steps:

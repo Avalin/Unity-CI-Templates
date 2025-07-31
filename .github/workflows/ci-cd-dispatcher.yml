@@ -59,9 +59,30 @@ permissions:
   pull-requests: write
 
 jobs:
-  validation:
-    name: Validate CI Configurations
+  resolve_runners:
+    name: Resolve Runner Labels
     runs-on: ubuntu-latest
+    outputs:
+      main: ${{ steps.resolve.outputs.main }}
+      macos: ${{ steps.resolve.outputs.macos }}
+    steps:
+      - name: Resolve runners
+        id: resolve
+        uses: avalin/unity-ci-templates/.github/actions/resolve-runners@main
+        with:
+          main: ${{ vars.MAIN_RUNNER }}
+          macos: ${{ vars.MACOS_RUNNER }}
+        env:
+          GH_TOKEN: ${{ secrets.CICD_PAT }}
+
+  validation:
+    name: Check Skip CI triggers
+    needs: 
+      - resolve_runners
+    runs-on: ${{ needs.resolve_runners.outputs.main }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
     steps:
@@ -109,10 +130,13 @@ jobs:
   prepare_metadata:
     name: Prepare Metadata
     needs: 
+      - resolve_runners
       - validation
     if: ${{ needs.validation.outputs.should_run == 'true'}}
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      runnerMain: ${{ needs.resolve_runners.outputs.main }}
+      runnerMacos: ${{ needs.resolve_runners.outputs.macos }}
       unityVersion: ${{ vars.UNITY_VERSION }}
       projectName: ${{ vars.PROJECT_NAME }}
       skipTests: ${{ inputs.skipTests }}
@@ -125,21 +149,27 @@ jobs:
     name: Create or Verify Tag
     needs: 
       - validation
+      - resolve_runners
       - prepare_metadata
     if: ${{ needs.validation.outputs.should_run == 'true'}}
     uses: ./.github/workflows/build-version-tagger.yml
     with:
+      runnerMain: ${{ needs.resolve_runners.outputs.main }}
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       buildVersion: ${{ needs.prepare_metadata.outputs.buildVersion }}
   
   trigger_ci:
     name: Trigger CI/CD Pipeline
     needs: 
+      - resolve_runners
       - validation
       - tagging
       - prepare_metadata
     if: ${{ needs.validation.outputs.should_run == 'true'}}
-    runs-on: ubuntu-latest
+    runs-on: ${{ needs.resolve_runners.outputs.main }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout Workflows Only
         uses: actions/checkout@v4
@@ -149,7 +179,19 @@ jobs:
           fetch-depth: 1
 
       - name: Install GitHub CLI
-        run: sudo apt-get install gh -y
+        shell: bash
+        run: |
+          if command -v gh &> /dev/null; then
+            echo "GitHub CLI already installed."
+          elif [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo apt-get update
+            sudo apt-get install gh -y
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install gh
+          else
+            echo "Please ensure GitHub CLI is installed on your Windows runner." >&2
+            exit 1
+          fi
 
       - name: Call CI/CD Pipeline from GitHub CLI
         env:
@@ -157,6 +199,8 @@ jobs:
         run: |
           gh workflow run ci-cd-pipeline.yml \
             --ref "${{ github.ref }}" \
+            --field runnerMain="$(printf '%s' '${{ needs.resolve_runners.outputs.main }}')" \
+            --field runnerMacos="$(printf '%s' '${{ needs.resolve_runners.outputs.macos }}')" \
             --field buildTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.buildTargets }}')" \
             --field validDeployTargets="$(printf '%s' '${{ needs.prepare_metadata.outputs.validDeployTargets }}')" \
             --field metadataConfig="$(jq -c -n \

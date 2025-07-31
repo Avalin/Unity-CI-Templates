@@ -39,6 +39,8 @@ jobs:
     name: ⏳ Prepare Metadata
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      runnerMain: "ubuntu-latest"
+      runnerMacos: "macos-latest"
       projectName: ${{ inputs.projectName }}
       unityVersion: ${{ vars.UNITY_VERSION }}
       skipTests: true
@@ -69,6 +71,7 @@ jobs:
     if: ${{ inputs.buildType == 'release' || inputs.buildType == 'release_candidate' }}
     uses: ./.github/workflows/step-3-release.yml
     with:
+      runnerMain: "ubuntu-latest"
       buildType: ${{ needs.prepare_metadata.outputs.buildType }}
       buildVersion: ${{ needs.prepare_metadata.outputs.buildVersion }}
       projectName: ${{ needs.prepare_metadata.outputs.projectName }}

@@ -7,6 +7,9 @@ description: |
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        required: true
+        type: string
       projectName:
         required: true
         type: string
@@ -25,7 +28,10 @@ on:
 jobs:
   combine:
     name: 📆 Combine All Build Targets Into One Folder
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       created: ${{ steps.set-created.outputs.success }}
     steps:
@@ -45,7 +51,7 @@ jobs:
 
           for DIR in all-artifacts/*; do
             ARTIFACT_NAME=$(basename "$DIR")
-            TARGET=$(echo "$ARTIFACT_NAME" | sed -E 's/^.*-([^-]+)$/\1/')
+            TARGET=$(echo "$ARTIFACT_NAME" | sed -E "s/^${PROJECT}-${VERSION}-?//")
             DEST="$COMBINED_DIR/$TARGET"
 
             echo "→ Merging target: $TARGET into $DEST"

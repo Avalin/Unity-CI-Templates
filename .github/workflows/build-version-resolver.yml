@@ -3,6 +3,9 @@ name: 🔖 Version Resolver
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
       buildType:
         description: "Build type: preview | release_candidate | release"
         required: true
@@ -19,7 +22,10 @@ on:
 jobs:
   version_resolver:
     name: Generate Build Version
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
+    defaults:
+      run:
+        shell: bash
     outputs:
       buildVersion: ${{ steps.get_version.outputs.version }}
 

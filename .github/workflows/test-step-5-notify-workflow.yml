@@ -73,6 +73,8 @@ jobs:
     name: ⏳ Prepare Metadata
     uses: ./.github/workflows/prepare-metadata.yml
     with:
+      runnerMain: "ubuntu-latest"
+      runnerMacos: "macos-latest"
       projectName: ${{ inputs.projectName }}
       unityVersion: ${{ vars.UNITY_VERSION }}
       skipTests: false
@@ -138,6 +140,7 @@ jobs:
     if: always()
     uses: ./.github/workflows/step-5-notify.yml
     with:
+      runnerMain: "ubuntu-latest"
       buildVersion: ${{ needs.prepare_metadata.outputs.buildVersion }}
       releaseResult: ${{ inputs.releaseResult }}
       releaseErrorMessage: ${{ needs.dry_release.outputs.releaseErrorMessage }}

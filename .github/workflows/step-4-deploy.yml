@@ -3,6 +3,12 @@ name: 🌍 Step 4 - Deploy
 on:
   workflow_call:
     inputs:
+      runnerMain:
+        type: string
+        required: true
+      runnerMacos:
+        type: string
+        required: true
       buildType:
         type: string
         required: true
@@ -59,12 +65,17 @@ jobs:
   resolve_deploy_matrix:
     uses: ./.github/workflows/resolve-deploy-matrix.yml
     with:
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       validTargets: ${{ inputs.deployTargets }}
 
   deploy:
     name: 🚀 Deploy ${{ matrix.target }} on ${{ matrix.os }}
     needs: resolve_deploy_matrix
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       fail-fast: false
       matrix:
@@ -152,9 +163,26 @@ jobs:
             echo "⚠️ Missing itch.io credentials."; 
             exit 1;
           fi
-          butler push "$ARTIFACT_DIR" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:${{ inputs.buildType }}"
+          TARGET_CHANNEL=""
+          for build_target in $(echo "$REQUIRED_BUILD_TARGETS" | jq -r '.[]'); do
+            TARGET_CHANNEL="unknown"
+            case "$build_target" in
+              Android) TARGET_CHANNEL="android" ;;
+              WebGL) TARGET_CHANNEL="webgl" ;;
+              StandaloneLinux64-Client) TARGET_CHANNEL="linux-client" ;;
+              StandaloneLinux64-Server) TARGET_CHANNEL="linux-server" ;;
+              StandaloneWindows) TARGET_CHANNEL="windows-32" ;;
+              StandaloneWindows64) TARGET_CHANNEL="windows-64" ;;
+              StandaloneOSX) TARGET_CHANNEL="osx-desktop" ;;
+              iOS) TARGET_CHANNEL="osx-ios" ;;
+            esac
+            echo "➡️ Pushing $ARTIFACT_DIR/$build_target to itch.io channel $TARGET_CHANNEL"
+            butler push "$ARTIFACT_DIR/$build_target" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:$TARGET_CHANNEL" --userversion "$VERSION"
+          done
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+          REQUIRED_BUILD_TARGETS: '${{ toJson(matrix.requiredBuildTargets) }}'
+          VERSION: ${{ inputs.buildVersion }}
 
       # ───── App Center ─────
       - name: 📱 Deploy to App Center
@@ -301,6 +329,7 @@ jobs:
     uses: ./.github/workflows/summarize-deploys.yml
     needs: deploy
     with:
+      runnerMain: ${{ inputs.runnerMain }}
       projectName: ${{ inputs.projectName }}
       buildVersion: ${{ inputs.buildVersion }}
       buildType: ${{ inputs.buildType }}

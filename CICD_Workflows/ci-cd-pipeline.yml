@@ -3,6 +3,12 @@ name: 🚀 CI/CD Pipeline (Public)
 on:
   workflow_dispatch:
     inputs:
+      runnerMain:
+        type: string
+        required: true
+      runnerMacos:
+        type: string
+        required: true
       validDeployTargets:
         type: string
         required: true
@@ -27,7 +33,7 @@ permissions:
 jobs:
   unpack_inputs:
     name: Unpack Inputs
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runnerMain }}
     outputs:
       projectName: ${{ steps.unpack.outputs.projectName }}
       skipTests: ${{ steps.unpack.outputs.skipTests }}
@@ -81,6 +87,7 @@ jobs:
     needs: unpack_inputs
     uses: avalin/unity-ci-templates/.github/workflows/step-1-test.yml@v1
     with:
+      runnerMain: ${{ inputs.runnerMain }}
       unityVersion: ${{ needs.unpack_inputs.outputs.unityVersion }}
       useGitLfs: ${{ needs.unpack_inputs.outputs.useGitLfs }}
       editModePath: ${{ needs.unpack_inputs.outputs.editModePath }}
@@ -107,6 +114,8 @@ jobs:
     uses: avalin/unity-ci-templates/.github/workflows/step-2-build.yml@v1
     with:
       # If the event is a push with a tag, force buildType to "release"; otherwise, use the input.
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
       unityVersion: ${{ needs.unpack_inputs.outputs.unityVersion }}
       buildVersion: ${{ needs.unpack_inputs.outputs.buildVersion }}
@@ -138,6 +147,7 @@ jobs:
       )
     uses: avalin/unity-ci-templates/.github/workflows/step-3-release.yml@v1
     with:
+      runnerMain: ${{ inputs.runnerMain }}
       buildType: ${{ needs.unpack_inputs.outputs.buildType }}
       buildVersion: ${{ needs.unpack_inputs.outputs.buildVersion }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
@@ -161,6 +171,8 @@ jobs:
        inputs.validDeployTargets != '[]'
     uses: avalin/unity-ci-templates/.github/workflows/step-4-deploy.yml@v1
     with:
+      runnerMain: ${{ inputs.runnerMain }}
+      runnerMacos: ${{ inputs.runnerMacos }}
       buildType: ${{ needs.unpack_inputs.outputs.buildType }}
       buildVersion: ${{ needs.unpack_inputs.outputs.buildVersion }}
       projectName: ${{ needs.unpack_inputs.outputs.projectName }}
@@ -170,6 +182,7 @@ jobs:
       artifactSource: build
     secrets:
       CICD_PAT: ${{ secrets.CICD_PAT }}
+      BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
       DEPLOY_API_KEY: ${{ secrets.DEPLOY_API_KEY }}
       ITCH_USERNAME: ${{ secrets.ITCH_USERNAME }}
       ITCH_PROJECT: ${{ secrets.ITCH_PROJECT }}
@@ -209,6 +222,7 @@ jobs:
       )
     uses: avalin/unity-ci-templates/.github/workflows/step-5-notify.yml@v1
     with:
+      runnerMain: ${{ inputs.runnerMain }}
       buildVersion: ${{ needs.unpack_inputs.outputs.buildVersion }}
       releaseResult: ${{ needs.release.result }}
       releaseErrorMessage: ${{ needs.release.outputs.releaseErrorMessage }}
