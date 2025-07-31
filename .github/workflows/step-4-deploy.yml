@@ -167,32 +167,17 @@ jobs:
           for build_target in $(echo "$REQUIRED_BUILD_TARGETS" | jq -r '.[]'); do
             TARGET_CHANNEL="unknown"
             case "$build_target" in
-              Android)
-                TARGET_CHANNEL="android"
-                ;;
-              WebGL)
-                TARGET_CHANNEL="webgl"
-                ;;
-              StandaloneLinux64-Client)
-                TARGET_CHANNEL="linux-client"
-                ;;
-              StandaloneLinux64-Server)
-                TARGET_CHANNEL="linux-server"
-                ;;
-              StandaloneWindows)
-                TARGET_CHANNEL="windows-32"
-                ;;
-              StandaloneWindows64)
-                TARGET_CHANNEL="windows-64"
-                ;;
-              StandaloneOSX)
-                TARGET_CHANNEL="osx-desktop"
-                ;;
-              iOS)
-                TARGET_CHANNEL="osx-ios"
-                ;;
+              Android) TARGET_CHANNEL="android" ;;
+              WebGL) TARGET_CHANNEL="webgl" ;;
+              StandaloneLinux64-Client) TARGET_CHANNEL="linux-client" ;;
+              StandaloneLinux64-Server) TARGET_CHANNEL="linux-server" ;;
+              StandaloneWindows) TARGET_CHANNEL="windows-32" ;;
+              StandaloneWindows64) TARGET_CHANNEL="windows-64" ;;
+              StandaloneOSX) TARGET_CHANNEL="osx-desktop" ;;
+              iOS) TARGET_CHANNEL="osx-ios" ;;
             esac
-            butler push "$ARTIFACT_DIR/$PROJECT_DIR"-"$build_target" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:$TARGET_CHANNEL" --userversion "$VERSION"
+            echo "➡️ Pushing $ARTIFACT_DIR/$build_target to itch.io channel $TARGET_CHANNEL"
+            butler push "$ARTIFACT_DIR/$build_target" "${{ secrets.ITCH_USERNAME }}/${{ secrets.ITCH_PROJECT }}:$TARGET_CHANNEL" --userversion "$VERSION"
           done
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
