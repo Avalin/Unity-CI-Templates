@@ -68,7 +68,7 @@ jobs:
     steps:
       - name: Resolve runners
         id: resolve
-        uses: avalin/unity-ci-templates/.github/actions/resolve-runners@main
+        uses: avalin/unity-ci-templates/.github/actions/resolve-runners@v1
         with:
           main: ${{ vars.MAIN_RUNNER }}
           macos: ${{ vars.MACOS_RUNNER }}
